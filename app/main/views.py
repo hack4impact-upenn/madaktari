@@ -1,6 +1,7 @@
 from flask import render_template, url_for, flash
+from flask_login import current_user, login_required
 from flask_rq import get_queue
-from ..models import EditableHTML, User
+from ..models import EditableHTML, User, Referral
 
 from . import main
 from .forms import ReferUserForm
@@ -20,7 +21,8 @@ def about():
                            editable_html_obj=editable_html_obj)
 
 
-@main.route('/referral')
+@main.route('/referral', methods=['GET', 'POST'])
+@login_required
 def refer_user():
     """Invites a new user to create an account and set their own password."""
     form = ReferUserForm()
@@ -29,7 +31,12 @@ def refer_user():
             first_name=form.first_name.data,
             last_name=form.last_name.data,
             email=form.email.data)
+        referral_record = Referral(
+                referrer=current_user.full_name(),
+                candidate=user.full_name()
+                )
         db.session.add(user)
+        db.session.add(referral_record)
         db.session.commit()
         token = user.generate_confirmation_token()
         invite_link = url_for(
