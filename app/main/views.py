@@ -20,7 +20,7 @@ def about():
                            editable_html_obj=editable_html_obj)
 
 
-@main.route('/referral')
+@main.route('/referral', methods=['GET', 'POST'])
 def refer_user():
     """Invites a new user to create an account and set their own password."""
     form = ReferUserForm()
