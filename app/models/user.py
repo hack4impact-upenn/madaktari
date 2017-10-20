@@ -24,12 +24,15 @@ class Role(db.Model):
     @staticmethod
     def insert_roles():
         roles = {
-            'User': (Permission.GENERAL, 'main', True),
+            'Applicant': (Permission.GENERAL, 'main', True),
             'Administrator': (
                 Permission.ADMINISTER,
                 'admin',
                 False  # grants all permissions
-            )
+            ),
+            'Accepted': (Permission.GENERAL, 'main', True),
+            'Rejected': (Permission.GENERAL, 'main', True),
+            'Pending': (Permission.GENERAL, 'main', True)
         }
         for r in roles:
             role = Role.query.filter_by(name=r).first()
@@ -73,6 +76,9 @@ class User(UserMixin, db.Model):
 
     def is_admin(self):
         return self.can(Permission.ADMINISTER)
+
+    def is_role(self, role):
+        return self.role.name.lower() == role.lower()
 
     @property
     def password(self):
