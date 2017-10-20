@@ -8,8 +8,11 @@ from .. import db, login_manager
 
 
 class Permission:
-    GENERAL = 0x01
-    ADMINISTER = 0xff
+    APPLICANT = 0x01
+    PENDING = 0x02
+    REJECTED = 0x04
+    ACCEPTED = 0x08
+    ADMINISTER = 0x10
 
 
 class Role(db.Model):
@@ -24,15 +27,15 @@ class Role(db.Model):
     @staticmethod
     def insert_roles():
         roles = {
-            'Applicant': (Permission.GENERAL, 'main', True),
+            'Applicant': (Permission.APPLICANT, 'main', True),
             'Administrator': (
                 Permission.ADMINISTER,
                 'admin',
                 False  # grants all permissions
             ),
-            'Accepted': (Permission.GENERAL, 'main', True),
-            'Rejected': (Permission.GENERAL, 'main', True),
-            'Pending': (Permission.GENERAL, 'main', True)
+            'Accepted': (Permission.ACCEPTED, 'main', True),
+            'Rejected': (Permission.REJECTED, 'main', True),
+            'Pending': (Permission.PENDING, 'main', True)
         }
         for r in roles:
             role = Role.query.filter_by(name=r).first()
