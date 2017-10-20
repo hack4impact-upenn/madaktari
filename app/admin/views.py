@@ -182,3 +182,10 @@ def update_editor_contents():
     db.session.commit()
 
     return 'OK', 200
+
+@admin.route('/application-form', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def application_form():
+    """Create a drag and drop form."""
+    return render_template('admin/application_form.html')
