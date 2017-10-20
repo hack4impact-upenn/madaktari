@@ -1,14 +1,17 @@
-from flask import abort, flash, redirect, render_template, url_for, request
+from flask import abort, flash, redirect, render_template, url_for, request, \
+                  jsonify
 from flask_login import current_user, login_required
 from flask_rq import get_queue
 
 from .forms import (ChangeAccountTypeForm, ChangeUserEmailForm, InviteUserForm,
                     NewUserForm)
 from . import admin
-from .. import db
+from .. import db, csrf
 from ..decorators import admin_required
 from ..email import send_email
-from ..models import Role, User, EditableHTML
+from ..models import Role, User, EditableHTML, Form
+import json
+import jsonpickle
 
 
 @admin.route('/')
@@ -183,9 +186,23 @@ def update_editor_contents():
 
     return 'OK', 200
 
-@admin.route('/application-form', methods=['GET', 'POST'])
+
+@admin.route('/create-form', methods=['GET', 'POST'])
 @login_required
 @admin_required
-def application_form():
-    """Create a drag and drop form."""
-    return render_template('admin/application_form.html')
+def create_form_index():
+    f = Form.get_form_content()
+    form = {}
+    if f is not None:
+        form = json.dumps(jsonpickle.decode(f.content))
+    return render_template('admin/create_form.html', form=form)
+
+
+@admin.route('/update-form', methods=['POST'])
+@csrf.exempt
+def update_form():
+    content = jsonpickle.encode(json.loads(request.json))
+    form = Form(content=content)
+    db.session.add(form)
+    db.session.commit()
+    return jsonify({'status': 200})
