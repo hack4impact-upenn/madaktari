@@ -142,7 +142,7 @@ def change_account_type(user_id):
 @admin.route('/user/<int:user_id>/delete')
 @login_required
 @admin_required
-def delete_user_request(user_id):
+def disable_user_request(user_id):
     """Request deletion of a user's account."""
     user = User.query.filter_by(id=user_id).first()
     if user is None:
@@ -153,16 +153,17 @@ def delete_user_request(user_id):
 @admin.route('/user/<int:user_id>/_delete')
 @login_required
 @admin_required
-def delete_user(user_id):
+def disable_user(user_id):
     """Delete a user's account."""
     if current_user.id == user_id:
         flash('You cannot delete your own account. Please ask another '
               'administrator to do this.', 'error')
     else:
         user = User.query.filter_by(id=user_id).first()
-        db.session.delete(user)
+        user.role = Role.query.filter_by(name='Applicant').first()
+        db.session.add(user)
         db.session.commit()
-        flash('Successfully deleted user %s.' % user.full_name(), 'success')
+        flash('Successfully disabled user %s.' % user.full_name(), 'success')
     return redirect(url_for('admin.registered_users'))
 
 
