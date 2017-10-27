@@ -45,16 +45,21 @@
                             <th class="sorted ascending">Last name</th>
                             <th>Email address</th>
                             <th>Account type</th>
+                            <th>Referrers</th>
+                            <th>Candidates Referred</th>
                         </tr>
                     </thead>
                     <tbody>
                     {% for u in users | sort(attribute='last_name') %}
                         <tr onclick="window.location.href = '{{ url_for('admin.user_info', user_id=u.id) }}';">
-
                             <td>{{ u.first_name }}</td>
                             <td>{{ u.last_name }}</td>
                             <td>{{ u.email }}</td>
                             <td class="user role">{{ u.role.name }}</td>
+                            <td> {% for user in u.referrers |  user.first_name %} </td>
+                            <td> {% for user in u.candidates |  user.first_name %} </td>
+                            {# <td class="referrals">{{  u.referrer.name }}</td>
+                            <td class="candidates">  }}</td> #}
                         </tr>
                     {% endfor %}
                     </tbody>

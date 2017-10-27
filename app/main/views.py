@@ -1,7 +1,7 @@
 from flask import render_template, url_for, flash
 from flask_login import current_user, login_required
 from flask_rq import get_queue
-from ..models import EditableHTML, User, Referral
+from ..models import EditableHTML, User
 
 from . import main
 from .forms import ReferUserForm
@@ -30,11 +30,14 @@ def refer_user():
         user = User(
             first_name=form.first_name.data,
             last_name=form.last_name.data,
-            email=form.email.data)
+            email=form.email.data,
+            referrer=current_user
+        )
+
         referral_record = Referral(
-                referrer=current_user.full_name(),
-                candidate=user.full_name()
-                )
+                referrer=current_user,
+                candidate=user
+        )
         db.session.add(user)
         db.session.add(referral_record)
         db.session.commit()
