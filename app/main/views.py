@@ -1,7 +1,7 @@
 from flask import render_template, url_for, flash
 from flask_login import current_user, login_required
 from flask_rq import get_queue
-from ..models import EditableHTML, User
+from ..models import EditableHTML, User, Role
 
 from . import main
 from .forms import ReferUserForm
@@ -54,4 +54,14 @@ def refer_user():
         flash('User {} successfully invited'.format(user.full_name()),
               'form-success')
     return render_template('main/referral.html', form=form)
+
+@main.route('/viewusers', methods=['GET', 'POST'])
+@login_required
+def view_user():
+    users = User.query.all()
+    final_users = []
+    for user in users:
+        if user.is_role('Accepted'):
+            final_users.append(user)
+    return render_template('main/accepted_users.html', users=final_users)
 

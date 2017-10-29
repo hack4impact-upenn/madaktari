@@ -1,13 +1,13 @@
 {% extends 'layouts/base.html' %}
 {% import 'macros/form_macros.html' as f %}
 
-{% set deletion_endpoint = 'admin.delete_user_request' %}
+{% set disable_endpoint = 'admin.disable_user_request' %}
 
 {% set endpoints = [
     ('admin.user_info', 'User information'),
     ('admin.change_user_email', 'Change email address'),
     ('admin.change_account_type', 'Change account type'),
-    (deletion_endpoint, 'Delete user')
+    (disable_endpoint, 'Disable user')
 ] %}
 
 {% macro navigation(items) %}
@@ -46,27 +46,17 @@
                 {{ navigation(endpoints) }}
             </div>
             <div class="eight wide column">
-                {% if request.endpoint == deletion_endpoint %}
-                    <h3 class="ui red block header">
-                        <i class="warning circle icon"></i>
-                        <div class="content">
-                            This action is permanent
-                            <div class="sub header">
-                                Deleting a user account is not a reversible change. Any information associated
-                                with this account will be removed, and cannot be recovered.
-                            </div>
-                        </div>
-                    </h3>
+                {% if request.endpoint == disable_endpoint %}
 
                     <div class="ui form">
                         <div class="inline field">
                             <div class="ui deletion checkbox">
                                 <input type="checkbox" tabindex="0" class="hidden">
-                                <label>I understand that this action cannot be undone.</label>
+                                <label>I understand that this action will cause this user to lose access to the protected parts of this system.</label>
                             </div>
                         </div>
                         <a class="ui disabled negative deletion button">
-                            Delete this user
+                            Disable this user
                         </a>
                     </div>
                     </div>
@@ -83,7 +73,7 @@
         $('.deletion.checkbox').checkbox({
             onChecked: function() {
                 $('.deletion.button').removeClass('disabled')
-                        .attr('href', '{{ url_for('admin.delete_user', user_id=user.id) }}');
+                        .attr('href', '{{ url_for('admin.disable_user', user_id=user.id) }}');
             },
             onUnchecked: function() {
                 $('.deletion.button').addClass('disabled').removeAttr('href');
