@@ -1,14 +1,17 @@
-from flask import abort, flash, redirect, render_template, url_for, request
+from flask import abort, flash, redirect, render_template, url_for, request, \
+                  jsonify
 from flask_login import current_user, login_required
 from flask_rq import get_queue
 
 from .forms import (ChangeAccountTypeForm, ChangeUserEmailForm, InviteUserForm,
                     NewUserForm)
 from . import admin
-from .. import db
+from .. import db, csrf
 from ..decorators import admin_required
 from ..email import send_email
-from ..models import Role, User, EditableHTML
+from ..models import Role, User, EditableHTML, Form
+import json
+import jsonpickle
 
 
 @admin.route('/')
@@ -139,7 +142,7 @@ def change_account_type(user_id):
 @admin.route('/user/<int:user_id>/delete')
 @login_required
 @admin_required
-def delete_user_request(user_id):
+def disable_user_request(user_id):
     """Request deletion of a user's account."""
     user = User.query.filter_by(id=user_id).first()
     if user is None:
@@ -150,16 +153,17 @@ def delete_user_request(user_id):
 @admin.route('/user/<int:user_id>/_delete')
 @login_required
 @admin_required
-def delete_user(user_id):
+def disable_user(user_id):
     """Delete a user's account."""
     if current_user.id == user_id:
         flash('You cannot delete your own account. Please ask another '
               'administrator to do this.', 'error')
     else:
         user = User.query.filter_by(id=user_id).first()
-        db.session.delete(user)
+        user.role = Role.query.filter_by(name='Applicant').first()
+        db.session.add(user)
         db.session.commit()
-        flash('Successfully deleted user %s.' % user.full_name(), 'success')
+        flash('Successfully disabled user %s.' % user.full_name(), 'success')
     return redirect(url_for('admin.registered_users'))
 
 
@@ -182,3 +186,24 @@ def update_editor_contents():
     db.session.commit()
 
     return 'OK', 200
+
+
+@admin.route('/create-form', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def create_form_index():
+    f = Form.get_form_content()
+    form = {}
+    if f is not None:
+        form = json.dumps(jsonpickle.decode(f.content))
+    return render_template('admin/create_form.html', form=form)
+
+
+@admin.route('/update-form', methods=['POST'])
+@csrf.exempt
+def update_form():
+    content = jsonpickle.encode(json.loads(request.json))
+    form = Form(content=content)
+    db.session.add(form)
+    db.session.commit()
+    return jsonify({'status': 200})
