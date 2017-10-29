@@ -27,15 +27,15 @@ class Role(db.Model):
     @staticmethod
     def insert_roles():
         roles = {
-            'Applicant': (Permission.APPLICANT, 'main', True),
+            'Applicant': (Permission.APPLICANT, 'account', True),
             'Administrator': (
                 Permission.ADMINISTER,
                 'admin',
                 False  # grants all permissions
             ),
-            'Accepted': (Permission.ACCEPTED, 'main', True),
-            'Rejected': (Permission.REJECTED, 'main', True),
-            'Pending': (Permission.PENDING, 'main', True)
+            'Accepted': (Permission.ACCEPTED, 'account', True),
+            'Rejected': (Permission.REJECTED, 'account', True),
+            'Pending': (Permission.PENDING, 'account', True)
         }
         for r in roles:
             role = Role.query.filter_by(name=r).first()
@@ -198,7 +198,7 @@ class User(UserMixin, db.Model):
                 first_name=fake.first_name(),
                 last_name=fake.last_name(),
                 email=fake.email(),
-                password=fake.password(),
+                password="password",
                 confirmed=True,
                 role=choice(roles),
                 **kwargs)
