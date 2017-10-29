@@ -56,10 +56,8 @@
                             <td>{{ u.last_name }}</td>
                             <td>{{ u.email }}</td>
                             <td class="user role">{{ u.role.name }}</td>
-                            <td> {% for user in u.referrers |  user.first_name %} </td>
-                            <td> {% for user in u.candidates |  user.first_name %} </td>
-                            {# <td class="referrals">{{  u.referrer.name }}</td>
-                            <td class="candidates">  }}</td> #}
+                            <td> {% for user in u.referrers | user.full_name() %} </td>
+                            <td> {% for user in u.candidates | user.full_name() %} </td>
                         </tr>
                     {% endfor %}
                     </tbody>
