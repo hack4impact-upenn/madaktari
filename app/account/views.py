@@ -242,7 +242,7 @@ def join_from_invite(user_id, token):
         token = new_user.generate_confirmation_token()
         invite_link = url_for(
             'account.join_from_invite',
-            user_id=user_id,
+            user_id=new_user.id,
             token=token,
             _external=True)
         get_queue().enqueue(
