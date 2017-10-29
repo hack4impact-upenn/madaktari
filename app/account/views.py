@@ -15,7 +15,7 @@ from .forms import (ChangeEmailForm, ChangePasswordForm, CreatePasswordForm,
 @account.route('/')
 @login_required
 def index():
-    """Admin dashboard page."""
+    """Account dashboard page."""
     return render_template('account/index.html')
 
 
@@ -249,7 +249,7 @@ def join_from_invite(user_id, token):
         token = new_user.generate_confirmation_token()
         invite_link = url_for(
             'account.join_from_invite',
-            user_id=user_id,
+            user_id=new_user.id,
             token=token,
             _external=True)
         get_queue().enqueue(
@@ -293,6 +293,17 @@ def refer_candidate():
         flash('Candidate {} successfully referred'.format(user.full_name()),
               'form-success')
     return render_template('account/refer_candidate.html', form=form)
+
+
+@account.route('/find_teammates', methods=['GET', 'POST'])
+@login_required
+def find_teammates():
+    users = User.query.all()
+    final_users = []
+    for user in users:
+        if user.is_role('Accepted'):
+            final_users.append(user)
+    return render_template('account/accepted_users.html', users=final_users)
 
 
 @account.before_app_request
