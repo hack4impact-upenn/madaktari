@@ -251,8 +251,11 @@ def get_response(user_id):
         for k in form_resp:
             k_new = k.replace('[]', '')
             for idx, x in enumerate(form_content):
-                if x['name'] == k_new:
-                    form_resp_obj.append({'idx': idx, 'label': x['label'], 'resp': form_resp[k]})
+                try:
+                    if x['name'] == k_new:
+                        form_resp_obj.append({'idx': idx, 'label': x['label'], 'resp': form_resp[k]})
+                except:
+                    pass
         form_resp_obj = sorted(form_resp_obj, key=lambda k: k['idx'])
     form = ChangeAccountTypeForm()
     if form.validate_on_submit():
