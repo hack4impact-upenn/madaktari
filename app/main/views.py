@@ -21,9 +21,9 @@ def edit_form():
 @main.route('/')
 def index():
     content = None
+    form_resp_obj = []
     try:
         content = Form.get_form_content()
-        form_resp_obj = []
         if current_user.is_authenticated and current_user.is_role('pending'):
             r = FormResponse.query.filter_by(user_id=current_user.id).order_by('id desc').first()
             raw_form_content = ''
