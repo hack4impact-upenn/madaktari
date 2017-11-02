@@ -3,6 +3,7 @@
 {% block content %}
     <div class="ui text container">
       <h1>Hello {% if not (current_user.is_authenticated) %} world {% else %} {{ current_user.full_name() }}. Your role is {{ current_user.role.name }}. {% endif %}</h1>
+      {% if current_user.is_authenticated %} 
       {% if current_user.is_role("applicant") and content is not none %}
         <div id="fb-render"></div>
         <form id="submitForm">
@@ -20,6 +21,7 @@
             $("#submitForm").submit(function() {
               var o = {};
               var a = $("#fb-render :input").serializeArray();
+              console.log(a)
               $.each(a, function() {
                 if (o[this.name] !== undefined) {
                   if (!o[this.name].push) {
@@ -49,6 +51,20 @@
             });
           });
         </script>
-      {% endif %}
+        {% elif current_user.is_role("pending") %}
+          <h1>Application Responses</h1>
+          <a href="{{ url_for('main.edit_form') }}">Remove and Edit Form Responses</a>
+          <div class="twelve wide column">
+            {% for f in form_resp_obj %}
+            <div>
+              <h2><strong>{{ loop.index }}. {{ f['label'] }}</strong></h2>
+              {% if f['resp'] is string %} <h4>{{ f['resp'] }}</h4> {% else %} <h4> {% for r in f['resp'] %} <p> {{ r }} </p> {% endfor %} </h4> {% endif %}
+            </div>
+            <br><br>
+            {% endfor %}
+          </div>
+          {% endif %}
+        {% endif %}
+        
     </div>
 {% endblock %}
