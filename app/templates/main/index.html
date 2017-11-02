@@ -18,7 +18,8 @@
               formData
             };
             $(fbRender).formRender(formRenderOpts);
-            $("#submitForm").submit(function() {
+            $("#submitForm").submit(function(e) {
+              e.preventDefault();
               var o = {};
               var a = $("#fb-render :input").serializeArray();
               console.log(a)
