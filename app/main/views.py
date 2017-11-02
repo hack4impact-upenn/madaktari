@@ -24,7 +24,7 @@ def index():
     form_resp_obj = []
     try:
         content = Form.get_form_content()
-        if current_user.is_authenticated and current_user.is_role('pending'):
+        if current_user.is_authenticated and current_user.is_role('Pending'):
             r = FormResponse.query.filter_by(user_id=current_user.id).order_by('id desc').first()
             raw_form_content = ''
             if r.form:
@@ -36,8 +36,11 @@ def index():
                 for k in form_resp:
                     k_new = k.replace('[]', '')
                     for idx, x in enumerate(form_content):
-                        if x['name'] == k_new:
-                            form_resp_obj.append({'idx': idx, 'label': x['label'], 'resp': form_resp[k]})
+                        try:
+                            if x['name'] == k_new:
+                                form_resp_obj.append({'idx': idx, 'label': x['label'], 'resp': form_resp[k]})
+                        except:
+                            pass
                 form_resp_obj = sorted(form_resp_obj, key=lambda k: k['idx'])
     except Exception:
         pass
