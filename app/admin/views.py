@@ -217,9 +217,18 @@ def update_form():
 @login_required
 @admin_required
 def get_responses():
-    responses = FormResponse.query.group_by(FormResponse.user_id).all()
+    responses = FormResponse.query.all()
     r_set = []
-    responses = [r_set.append(r) for r in responses if (r.user.is_role('Pending') and (r in r_set) is False)]
+    for r in responses:
+        if r.user.is_role('Pending'):
+            is_in = False
+            for rs in r_set:
+                if r.user_id == rs.user_id:
+                    is_in = True
+                    break
+            if is_in is False:
+                print(r_set)
+                r_set.append(r)
     return render_template('admin/view_responses.html', responses=r_set)
 
 
