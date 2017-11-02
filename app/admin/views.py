@@ -32,8 +32,7 @@ def new_user():
         user = User(
             role=form.role.data,
             first_name=form.first_name.data,
-            last_name=form.last_name.data,
-            email=form.email.data,
+            last_name=form.last_name.data, email=form.email.data,
             password=form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -219,8 +218,9 @@ def update_form():
 @admin_required
 def get_responses():
     responses = FormResponse.query.group_by(FormResponse.user_id).all()
-    responses = [r for r in responses if r.user.is_role('Pending')]
-    return render_template('admin/view_responses.html', responses=responses)
+    r_set = []
+    responses = [r_set.append(r) for r in responses if (r.user.is_role('Pending') and (r in r_set) is False)]
+    return render_template('admin/view_responses.html', responses=r_set)
 
 
 @admin.route('/view-response/<int:user_id>', methods=['GET','POST'])
