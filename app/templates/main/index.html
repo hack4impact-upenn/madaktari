@@ -47,7 +47,8 @@
                   "data": JSON.stringify(o)
               };
               $.ajax(settings).done(function (response) {
-                console.log(response);
+                alert("successfully submitted form");
+                location.reload()
               });
             });
           });

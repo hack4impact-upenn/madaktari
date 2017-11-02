@@ -197,6 +197,7 @@ def create_form_index():
         if f is not None:
             print(f)
             form = json.dumps(jsonpickle.decode(f))
+            form = form.replace("'", '')
     except Exception as e:
         print(e)
         form = {}
