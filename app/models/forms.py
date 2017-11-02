@@ -7,7 +7,10 @@ class Form(db.Model):
 
     @staticmethod
     def get_form_content():
-        return Form.query.order_by('id desc').first().content
+        # check for existing form
+        form_content = Form.query.order_by('id desc').first()
+        if form_content is not None:
+            return form_content
 
 class FormResponse(db.Model):
     id = db.Column(db.Integer, primary_key=True)
