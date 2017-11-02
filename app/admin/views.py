@@ -218,7 +218,7 @@ def update_form():
 @login_required
 @admin_required
 def get_responses():
-    responses = FormResponse.query.order_by('id desc').all()
+    responses = db.session.query(FormResponse.id).join(FormResponse.user_id).group_by(FormResponse.user_id)
     responses = [r for r in responses if r.user.is_role('Pending')]
     return render_template('admin/view_responses.html', responses=responses)
 
