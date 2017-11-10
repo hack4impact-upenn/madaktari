@@ -10,6 +10,7 @@ from ..models import User
 from .forms import (ChangeEmailForm, ChangePasswordForm, CreatePasswordForm,
                     LoginForm, RegistrationForm, RequestResetPasswordForm,
                     ResetPasswordForm, ReferCandidateForm)
+from ..decorators import accepted_required
 
 
 @account.route('/')
@@ -213,6 +214,24 @@ def confirm(token):
     return redirect(url_for('main.index'))
 
 
+@account.before_app_request
+def before_request():
+    """Force user to confirm email before accessing login-required routes."""
+    if current_user.is_authenticated \
+            and not current_user.confirmed \
+            and request.endpoint[:8] != 'account.' \
+            and request.endpoint != 'static':
+        return redirect(url_for('account.unconfirmed'))
+
+
+@account.route('/unconfirmed')
+def unconfirmed():
+    """Catch users with unconfirmed emails."""
+    if current_user.is_anonymous or current_user.confirmed:
+        return redirect(url_for('main.index'))
+    return render_template('account/unconfirmed.html')
+
+
 @account.route(
     '/join-from-invite/<int:user_id>/<token>', methods=['GET', 'POST'])
 def join_from_invite(user_id, token):
@@ -306,19 +325,14 @@ def find_teammates():
     return render_template('account/accepted_users.html', users=final_users)
 
 
-@account.before_app_request
-def before_request():
-    """Force user to confirm email before accessing login-required routes."""
-    if current_user.is_authenticated \
-            and not current_user.confirmed \
-            and request.endpoint[:8] != 'account.' \
-            and request.endpoint != 'static':
-        return redirect(url_for('account.unconfirmed'))
+@account.route('/create_team', methods=['GET', 'POST'])
+@login_required
+# @accepted_required
+def create_team():
+    users = User.query.all()
+    final_users = []
+    for user in users:
+        if user.is_role('Accepted'):
+            final_users.append(user)
+    return render_template('account/create_team.html', users=final_users)
 
-
-@account.route('/unconfirmed')
-def unconfirmed():
-    """Catch users with unconfirmed emails."""
-    if current_user.is_anonymous or current_user.confirmed:
-        return redirect(url_for('main.index'))
-    return render_template('account/unconfirmed.html')
