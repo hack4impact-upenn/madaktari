@@ -7,6 +7,7 @@ from . import account
 from .. import db
 from ..email import send_email
 from ..models import User
+from ..decorators import accepted_required
 from .forms import (ChangeEmailForm, ChangePasswordForm, CreatePasswordForm,
                     LoginForm, RegistrationForm, RequestResetPasswordForm,
                     ResetPasswordForm, ReferCandidateForm)
@@ -311,3 +312,8 @@ def unconfirmed():
     if current_user.is_anonymous or current_user.confirmed:
         return redirect(url_for('main.index'))
     return render_template('account/unconfirmed.html')
+
+@account.route('/edit_dates')
+@login_required
+def edit_dates():
+    return render_template('account/edit_dates.html')    

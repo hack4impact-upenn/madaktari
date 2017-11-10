@@ -1,0 +1,77 @@
+{% extends 'layouts/base.html' %}
+{% import 'macros/dash_macros.html' as d %}
+
+{% block content %}
+    <div class="ui stackable centered grid container">
+        <div class="twelve wide column">
+            <h2 class="ui header">
+                Account Dashboard
+            </h2>
+            <div class="ui three column stackable grid">
+               <div class="column" id="leftCol">
+                    <div class="ui calendar" id="start1">
+                        <div class="ui input left icon">
+                            <i class="calendar icon"></i>
+                            <input type="text" placeholder="Start date">
+                        </div>
+                    </div>
+                </div>
+                <div class="column" id="rightCol">
+                    <div class="ui calendar" id="end1">
+                        <div class="ui input left icon">
+                            <i class="calendar icon"></i>
+                            <input type="text" placeholder="End date">
+                        </div>
+                    </div>
+                    <br>
+                    <div class="ui button" id="addRange">Add Range</div>
+                </div>
+                <div class="column" id="lastCol">
+                    <br>
+                    <br id="placeholderRow1">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.9/semantic.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui-calendar/0.0.8/calendar.min.js"></script>
+    <script>
+        var numDates = 1;
+            var deleteRange = function(i) {
+                $(document).ready(function() {
+                $("#start"+i.toString()).remove();
+                $("#end"+i.toString()).remove();
+                $("#delete"+i.toString()).remove();
+                if (numDates === i) {
+                    i -= 1;
+                    while ($("#start"+i.toString()).length === 0) {
+                        i -= 1;
+                    }
+                    numDates = i;
+                }
+                });
+            };
+        $(document).ready(function() {
+
+            $("#start1").calendar();
+            $("#end1").calendar();
+            $("#addRange").click(function() {
+                var numDatesIncr = numDates+1;
+                $("#start"+numDates.toString()).after("<br style=\"line-height: 50%\"><div class=\"ui calendar\" id=\"start"+numDatesIncr.toString()+"\"><div class=\"ui input left icon\"><i class=\"calendar icon\"></i><input type=\"text\" placeholder=\"Start date\"></div></div>");
+                $("#end"+numDates.toString()).after("<br style=\"line-height: 50%\"><div class=\"ui calendar\" id=\"end"+numDatesIncr.toString()+"\"><div class=\"ui input left icon\"><i class=\"calendar icon\"></i><input type=\"text\" placeholder=\"End date\"></div></div>");
+                $("#start"+numDatesIncr.toString()).calendar();
+                $("#end"+numDatesIncr.toString()).calendar();
+                if (numDates === 1) {
+                    $("#placeholderRow1").after("<br style=\"line-height: 50%\"><div class=\"ui button\" id=\"delete"+numDatesIncr.toString()+"\" onclick=\"deleteRange(2)\">Delete</div>");
+                }
+                else {
+                    $("#delete"+numDates.toString()).after("<br><br style=\"line-height: 50%\"><div class=\"ui button\" id=\"delete"+numDatesIncr.toString()+"\" onclick=\"deleteRange("+numDatesIncr.toString()+")\">Delete</div>");
+                }
+                numDates = numDatesIncr;
+            });
+        });
+    </script>
+        
+{% endblock %}
