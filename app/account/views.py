@@ -9,7 +9,7 @@ from ..email import send_email
 from ..models import User
 from .forms import (ChangeEmailForm, ChangePasswordForm, CreatePasswordForm,
                     LoginForm, RegistrationForm, RequestResetPasswordForm,
-                    ResetPasswordForm, ReferCandidateForm)
+                    ResetPasswordForm, ReferCandidateForm, CreateTeamForm)
 from ..decorators import accepted_required
 
 
@@ -329,10 +329,5 @@ def find_teammates():
 @login_required
 # @accepted_required
 def create_team():
-    users = User.query.all()
-    final_users = []
-    for user in users:
-        if user.is_role('Accepted'):
-            final_users.append(user)
-    return render_template('account/create_team.html', users=final_users)
+    return render_template('account/create_team.html', form=CreateTeamForm)
 
