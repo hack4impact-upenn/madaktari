@@ -32,6 +32,7 @@
                             <th>First name</th>
                             <th class="sorted ascending">Last name</th>
                             <th>Email address</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -40,6 +41,9 @@
                             <td>{{ u.first_name }}</td>
                             <td>{{ u.last_name }}</td>
                             <td><a href="mailto:{{u.email}}">{{ u.email }}</td>
+                            <td>
+                                <a href="{{ url_for('account.add_to_team', user_id=u.id) }}" class="ui button">Add to Team</a>
+                            </td>
                         </tr>
                     {% endfor %}
                     </tbody>

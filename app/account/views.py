@@ -4,12 +4,12 @@ from flask_login import (current_user, login_required, login_user,
 from flask_rq import get_queue
 
 from . import account
-from .. import db
+from .. import db, csrf
 from ..email import send_email
 from ..models import User
 from .forms import (ChangeEmailForm, ChangePasswordForm, CreatePasswordForm,
                     LoginForm, RegistrationForm, RequestResetPasswordForm,
-                    ResetPasswordForm, ReferCandidateForm, CreateTeamForm)
+                    ResetPasswordForm, ReferCandidateForm)
 from ..decorators import accepted_required
 
 
@@ -317,17 +317,40 @@ def refer_candidate():
 @account.route('/find_teammates', methods=['GET', 'POST'])
 @login_required
 def find_teammates():
-    users = User.query.all()
-    final_users = []
-    for user in users:
-        if user.is_role('Accepted'):
-            final_users.append(user)
-    return render_template('account/accepted_users.html', users=final_users)
+    accepted_users = User.query.filter_by(role_id=3)
+    # remove current user
+    accepted_users = [u for u in accepted_users if u.id != current_user.id]
+
+    return render_template('account/accepted_users.html', users=accepted_users)
 
 
-@account.route('/create_team', methods=['GET', 'POST'])
+@account.route('/team', methods=['GET', 'POST'])
 @login_required
-# @accepted_required
-def create_team():
-    return render_template('account/create_team.html', form=CreateTeamForm)
+def see_team():
+    return render_template('account/team.html')
+
+
+@account.route('/add_to_team', methods=['GET'])
+@csrf.exempt
+def add_to_team():
+    user_id = request.args.get('user_id')
+    if current_user.team_id is None:
+        user = Team(
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            email=form.email.data,
+            password=form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        # create a team
+
+
+    return redirect('account/team');
+
+
+# @account.route('/team_formation', methods=['GET', 'POST'])
+# @login_required
+# # @accepted_required
+# def create_team():
+#     return render_template('account/team_formation.html', form=CreateTeamForm)
 

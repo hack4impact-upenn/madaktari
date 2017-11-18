@@ -67,20 +67,13 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
-    team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
-    team_confirmed = db.Boolean
 
-    referrers = db.relationship("User", secondary=referrals,
+    referrers = db.relationship('User', secondary=referrals,
                                 primaryjoin=id==referrals.c.referrer_id,
                                 secondaryjoin=id==referrals.c.candidate_id,
                                 backref=db.backref('candidates', lazy='dynamic'),
                                 lazy='dynamic')
-
-        # db.Column(db.Integer, db.ForeignKey('users.id'))
-
-    # referrer = db.relationship('User', remote_side=[id])
-    #, secondary=referrals, backref=db.backref('referrals', lazy='dynamic'))
-    # candidates = db.relationship('User', secondary=referrals, backref=db.backref('referrals', lazy='dynamic'))
+    team_memberships = db.relationship('TeamMember')
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
