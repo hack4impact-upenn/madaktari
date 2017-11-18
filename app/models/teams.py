@@ -4,7 +4,7 @@ from .. import db, login_manager
 class Team(db.Model):
     __tablename__ = 'team'
     id = db.Column(db.Integer, primary_key=True)
-    team_members = db.relationship('TeamMember')
+    team_members = db.relationship('TeamMember', backref="team")
     is_confirmed = db.Column(db.Boolean)
 
     def __init__(self, user):
@@ -28,8 +28,9 @@ class Team(db.Model):
 class TeamMember(db.Model):
     __tablename = 'TeamMember'
     id = db.Column(db.Integer, primary_key=True)
-    team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     is_confirmed = db.Column(db.Boolean)
     is_owner = db.Column(db.Boolean)
+    team_id = db.Column(db.Integer, db.ForeignKey('team.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
 

@@ -6,7 +6,7 @@ from flask_rq import get_queue
 from . import account
 from .. import db, csrf
 from ..email import send_email
-from ..models import User
+from ..models import User, Team
 from .forms import (ChangeEmailForm, ChangePasswordForm, CreatePasswordForm,
                     LoginForm, RegistrationForm, RequestResetPasswordForm,
                     ResetPasswordForm, ReferCandidateForm)
@@ -334,16 +334,15 @@ def see_team():
 @csrf.exempt
 def add_to_team():
     user_id = request.args.get('user_id')
-    if current_user.team_id is None:
-        user = Team(
-            first_name=form.first_name.data,
-            last_name=form.last_name.data,
-            email=form.email.data,
-            password=form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        # create a team
+    team_id = request.args.get('team_id')
 
+    user = User.query.get(user_id)
+    team = Team(current_user) if team_id is None else Team.query.get(team_id)
+    team_current_users = [tm.user_id for tm in team.team_members]
+
+    # prevent adding a user to a team twice
+    if user_id not in team_current_users:
+        team.add_to_team(user)
 
     return redirect('account/team');
 

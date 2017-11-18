@@ -73,7 +73,7 @@ class User(UserMixin, db.Model):
                                 secondaryjoin=id==referrals.c.candidate_id,
                                 backref=db.backref('candidates', lazy='dynamic'),
                                 lazy='dynamic')
-    team_memberships = db.relationship('TeamMember')
+    team_memberships = db.relationship('TeamMember', backref="user")
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
