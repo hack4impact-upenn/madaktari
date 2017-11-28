@@ -1,0 +1,126 @@
+{% extends 'layouts/base.html' %}
+{% import 'macros/dash_macros.html' as d %}
+
+{% block content %}
+    <div class="ui stackable centered grid container">
+        <div class="twelve wide column">
+            <h2 class="ui header">
+                Account Dashboard
+            </h2>
+            <div class="ui three column stackable grid">
+               <div class="column" id="leftCol">
+                    <div class="ui calendar" id="start1">
+                        <div class="ui input left icon">
+                            <i class="calendar icon"></i>
+                            <input type="text" placeholder="Start date">
+                        </div>
+                    </div>
+                    <br>
+                    <div class="ui button" id="submitRanges">Submit</div>
+                </div>
+                <div class="column" id="rightCol">
+                    <div class="ui calendar" id="end1">
+                        <div class="ui input left icon">
+                            <i class="calendar icon"></i>
+                            <input type="text" placeholder="End date">
+                        </div>
+                    </div>
+                    <br>
+                    <div class="ui button" id="addRange">Add Range</div>
+                </div>
+                <div class="column" id="lastCol">
+                    <br>
+                    <br id="placeholderRow1">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.9/semantic.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui-calendar/0.0.8/calendar.min.js"></script>
+    <script>
+        var numDates = 1;
+            var deleteRange = function(i) {
+                $(document).ready(function() {
+                $("#start"+i.toString()).remove();
+                $("#end"+i.toString()).remove();
+                $("#delete"+i.toString()).remove();
+                if (numDates === i) {
+                    i -= 1;
+                    while ($("#start"+i.toString()).length === 0) {
+                        i -= 1;
+                    }
+                    numDates = i;
+                }
+                });
+            };
+        $(document).ready(function() {
+            var flag = false;
+            {% for range in dateranges %}
+                if (flag) {
+                    var numDatesIncr = numDates+1;
+                    $("#start"+numDates.toString()).after("<br style=\"line-height: 50%\"><div class=\"ui calendar\" id=\"start"+numDatesIncr.toString()+"\"><div class=\"ui input left icon\"><i class=\"calendar icon\"></i><input type=\"text\" placeholder=\"Start date\"></div></div>");
+                    $("#end"+numDates.toString()).after("<br style=\"line-height: 50%\"><div class=\"ui calendar\" id=\"end"+numDatesIncr.toString()+"\"><div class=\"ui input left icon\"><i class=\"calendar icon\"></i><input type=\"text\" placeholder=\"End date\"></div></div>");
+                    if (numDates === 1) {
+                        $("#placeholderRow1").after("<br style=\"line-height: 50%\"><div class=\"ui button\" id=\"delete"+numDatesIncr.toString()+"\" onclick=\"deleteRange(2)\">Delete</div>");
+                    }
+                    else {
+                        $("#delete"+numDates.toString()).after("<br><br style=\"line-height: 50%\"><div class=\"ui button\" id=\"delete"+numDatesIncr.toString()+"\" onclick=\"deleteRange("+numDatesIncr.toString()+")\">Delete</div>");
+                    }
+                    numDates = numDatesIncr;
+                }
+                $("#start"+numDates.toString()).calendar({type: 'date'});
+                $("#start"+numDates.toString()).calendar('set date', new Date({{ range.start_date.year }}, {{ range.start_date.month }}, {{ range.start_date.day }}));
+                $("#end"+numDates.toString()).calendar({type: 'date'});
+                $("#end"+numDates.toString()).calendar('set date', new Date({{ range.end_date.year }}, {{ range.end_date.month }}, {{ range.end_date.day }}));
+                flag = true;
+            {% endfor %}
+            if (numDates === 1) {
+                $("#start1").calendar({type: 'date'});
+                $("#end1").calendar({type: 'date'});
+            }
+            else {
+                numDates--;
+            }
+            $("#addRange").click(function() {
+                var numDatesIncr = numDates+1;
+                $("#start"+numDates.toString()).after("<br style=\"line-height: 50%\"><div class=\"ui calendar\" id=\"start"+numDatesIncr.toString()+"\"><div class=\"ui input left icon\"><i class=\"calendar icon\"></i><input type=\"text\" placeholder=\"Start date\"></div></div>");
+                $("#end"+numDates.toString()).after("<br style=\"line-height: 50%\"><div class=\"ui calendar\" id=\"end"+numDatesIncr.toString()+"\"><div class=\"ui input left icon\"><i class=\"calendar icon\"></i><input type=\"text\" placeholder=\"End date\"></div></div>");
+                $("#start"+numDatesIncr.toString()).calendar({type: 'date'});
+                $("#end"+numDatesIncr.toString()).calendar({type: 'date'});
+                if (numDates === 1) {
+                    $("#placeholderRow1").after("<br style=\"line-height: 50%\"><div class=\"ui button\" id=\"delete"+numDatesIncr.toString()+"\" onclick=\"deleteRange(2)\">Delete</div>");
+                }
+                else {
+                    $("#delete"+numDates.toString()).after("<br><br style=\"line-height: 50%\"><div class=\"ui button\" id=\"delete"+numDatesIncr.toString()+"\" onclick=\"deleteRange("+numDatesIncr.toString()+")\">Delete</div>");
+                }
+                numDates = numDatesIncr;
+            });
+            $("#submitRanges").click(function() {
+                var ranges = [];
+                for (var i = 0; i <= numDates; i++) {
+                    if ($("#start"+i.toString()).length > 0) {
+                        ranges.push({"start": $("#start"+i.toString()).calendar('get date'), "end": $("#end"+i.toString()).calendar('get date')});
+                    }
+                }
+                var settings = {
+                    "async": true,
+                    "crossDomain": true,
+                    "url": "/account/edit_dates",
+                    "method": "POST",
+                    "headers": {
+                        "content-type": "application/json",
+                        "cache-control": "no-cache",
+                    },
+                    "processData": false,
+                    "data": JSON.stringify(ranges)
+                };
+                $.ajax(settings).done(function (response) {
+                    console.log(response);
+                });
+            });
+        });
+    </script>
+        
+{% endblock %}
