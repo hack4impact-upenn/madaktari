@@ -51,6 +51,17 @@ class Role(db.Model):
         return '<Role \'%s\'>' % self.name
 
 
+# referrals = db.Table('referrals', db.Column('referrer_id', db.Integer, db.ForeignKey('users.id')),
+#                      db.Column('candidate_id', db.Integer, db.ForeignKey('users.id')))
+
+
+referrals = db.Table(
+    'referrals',
+    db.Column('referrer_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
+    db.Column('candidate_id', db.Integer, db.ForeignKey('users.id'), primary_key=True)
+)
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -61,6 +72,18 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     responses = db.relationship('FormResponse', backref='user')
+
+    referrers = db.relationship("User", secondary=referrals,
+                                primaryjoin=id==referrals.c.referrer_id,
+                                secondaryjoin=id==referrals.c.candidate_id,
+                                backref=db.backref('candidates', lazy='dynamic'),
+                                lazy='dynamic')
+
+        # db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    # referrer = db.relationship('User', remote_side=[id])
+    #, secondary=referrals, backref=db.backref('referrals', lazy='dynamic'))
+    # candidates = db.relationship('User', secondary=referrals, backref=db.backref('referrals', lazy='dynamic'))
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
