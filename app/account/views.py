@@ -320,8 +320,8 @@ def find_teammates():
     accepted_users = User.query.filter_by(role_id=3)
     # remove current user
     accepted_users = [u for u in accepted_users if u.id != current_user.id]
-
-    return render_template('account/accepted_users.html', users=accepted_users)
+    teams = current_user.get_teams()
+    return render_template('account/accepted_users.html', users=accepted_users, teams=teams)
 
 
 @account.route('/team', methods=['GET', 'POST'])
@@ -337,7 +337,7 @@ def add_to_team():
     team_id = request.args.get('team_id')
 
     user = User.query.get(user_id)
-    team = Team(current_user) if team_id is None else Team.query.get(team_id)
+    team = Team.query.get(team_id)
     team_current_users = [tm.user_id for tm in team.team_members]
 
     # prevent adding a user to a team twice
@@ -345,6 +345,9 @@ def add_to_team():
         team.add_to_team(user)
 
     return redirect('account/team');
+
+
+
 
 
 # @account.route('/team_formation', methods=['GET', 'POST'])

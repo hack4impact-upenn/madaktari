@@ -199,6 +199,10 @@ class User(UserMixin, db.Model):
             except IntegrityError:
                 db.session.rollback()
 
+    def get_teams(self):
+        return [team_membership.team_id for team_membership in self.team_memberships]
+
+
     def __repr__(self):
         return '<User \'%s\'>' % self.full_name()
 

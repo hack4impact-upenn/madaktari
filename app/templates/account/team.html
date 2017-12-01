@@ -1,10 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-<h1>Hey MTV, welcome to my team</h1>
-</body>
-</html>
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+    <div class="ui stackable grid container">
+        <div class="sixteen wide tablet twelve wide computer centered column">
+            <a class="ui basic compact button" href="{{ url_for('admin.index') }}">
+                <i class="caret left icon"></i>
+                Back to dashboard
+            </a>
+            <h2 class="ui header">
+                My Teams
+                <div class="sub header">
+                    View and manage your teams
+                </div>
+            </h2>
+
+            {# Use overflow-x: scroll so that mobile views don't freak out
+             # when the table is too wide #}
+            <div style="overflow-x: scroll;">
+                <table class="ui sortable unstackable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>First name</th>
+                            <th class="sorted ascending">Last name</th>
+                            <th>Email address</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for u in users | sort(attribute='last_name') %}
+                        <tr>
+                            <td>{{ u.first_name }}</td>
+                            <td>{{ u.last_name }}</td>
+                            <td><a href="mailto:{{u.email}}">{{ u.email }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

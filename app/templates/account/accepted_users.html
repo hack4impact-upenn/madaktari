@@ -42,7 +42,7 @@
                             <td>{{ u.last_name }}</td>
                             <td><a href="mailto:{{u.email}}">{{ u.email }}</td>
                             <td>
-                                <a href="{{ url_for('account.add_to_team', user_id=u.id) }}" class="ui button">Add to Team</a>
+                                <button class="ui button" onclick="add_user_to_team_modal({{ u.full_name() }})">Add to Team</button>
                             </td>
                         </tr>
                     {% endfor %}
@@ -52,7 +52,40 @@
         </div>
     </div>
 
+    <div class="ui modal">
+        <i class="close icon"></i>
+        <div class="header">
+            Add Volunteer to Team
+        </div>
+        <div class="ui segment">
+            <div class="ui form">
+                <div class="field">
+                    <label>Team</label>
+                    <select multiple="" class="ui dropdown" onchange="check_for_new_team(this.value)">>
+                        <option value="">Select Team</option>
+                        <option value="new_team">Create New Team</option>
+                        {% for t in teams %}
+                            <option value="{{ t.id }}">{{ t.team_name }}</option>
+                        {%  endfor %}
+                    </select>
+                <div class="field">
+                    <label>Name of New Team</label>
+                    <input type="text" name="new_team_name">
+                </div>
+                <div class="field">
+                    <label>Email Message for <span id="user_to_add">Volunteer</span></label>
+                    <input type="text" name="email" placeholder="Message TODO">
+                </div>
+                <input class="ui button" type="submit" value="Confirm">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <script type="text/javascript">
+
+        // Searching in list of users
         $(document).ready(function () {
             $('#search-users').keyup(function () {
                 var searchText = $(this).val();
@@ -74,5 +107,24 @@
                 }
             });
         });
+
+        // Check if new team
+        function check_for_new_team(selected_value) {
+            if (selected_value == "new_team") {
+
+            }
+        }
+
+        function
+
+
+
+    </script>
+    <script type="text/javascript">
+    // modal logic
+     $('.ui.modal').modal('show');
+    function enable_modal(user_to_add) {
+        $('.ui.modal').modal('show');
+    }
     </script>
 {% endblock %}

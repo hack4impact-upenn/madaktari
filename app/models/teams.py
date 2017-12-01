@@ -4,6 +4,7 @@ from .. import db, login_manager
 class Team(db.Model):
     __tablename__ = 'team'
     id = db.Column(db.Integer, primary_key=True)
+    team_name = db.Column(db.String(64), index=True)
     team_members = db.relationship('TeamMember', backref="team")
     is_confirmed = db.Column(db.Boolean)
 
