@@ -8,11 +8,12 @@ class Team(db.Model):
     team_members = db.relationship('TeamMember', backref="team")
     is_confirmed = db.Column(db.Boolean)
 
-    def __init__(self, user):
+    def __init__(self, user, team_name):
         new_team_member = TeamMember(is_confirmed=False, is_owner=True)
         user.team_memberships.append(new_team_member)
         self.team_members.append(new_team_member)
         self.is_confirmed = False
+        self.team_name = team_name
 
     def add_to_team(self, user):
         new_team_member = TeamMember(is_confirmed=False, is_owner=False)

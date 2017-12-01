@@ -14,28 +14,19 @@
                 </div>
             </h2>
 
-            {# Use overflow-x: scroll so that mobile views don't freak out
-             # when the table is too wide #}
-            <div style="overflow-x: scroll;">
-                <table class="ui sortable unstackable selectable celled table">
-                    <thead>
-                        <tr>
-                            <th>First name</th>
-                            <th class="sorted ascending">Last name</th>
-                            <th>Email address</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for u in users | sort(attribute='last_name') %}
-                        <tr>
-                            <td>{{ u.first_name }}</td>
-                            <td>{{ u.last_name }}</td>
-                            <td><a href="mailto:{{u.email}}">{{ u.email }}</td>
-                        </tr>
+            {% for team in teams %}
+                <div class="ui segment">
+                    <h3 class="ui header">{{ team.team_name }}</h3>
+
+                    <div class="ui bulleted list">
+                    {% for member in team.team_members %}
+                        <div class="item">{{ User.get_user_fullname(member.user_id) }}</div>
                     {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+
         </div>
     </div>
 {% endblock %}

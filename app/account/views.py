@@ -321,38 +321,33 @@ def find_teammates():
     # remove current user
     accepted_users = [u for u in accepted_users if u.id != current_user.id]
     teams = current_user.get_teams()
+    print(teams)
     return render_template('account/accepted_users.html', users=accepted_users, teams=teams)
 
 
 @account.route('/team', methods=['GET', 'POST'])
 @login_required
 def see_team():
-    return render_template('account/team.html')
+    teams = current_user.get_teams()
+    print("teams: ")
+    print(teams)
+    return render_template('account/team.html', teams=teams, User=User)
 
 
-@account.route('/add_to_team', methods=['GET'])
-@csrf.exempt
+@account.route('/add_to_team', methods=['GET', 'POST'])
 def add_to_team():
     user_id = request.args.get('user_id')
     team_id = request.args.get('team_id')
+    new_team_name = request.args.get('new_team_name')
+
+    if team_id == "new_team":
+        team = Team(current_user, new_team_name)
+        db.session.add(team)
+        db.session.commit()
+    else:
+        team = Team.query.get(team_id)
 
     user = User.query.get(user_id)
-    team = Team.query.get(team_id)
-    team_current_users = [tm.user_id for tm in team.team_members]
+    team.add_to_team(user)
 
-    # prevent adding a user to a team twice
-    if user_id not in team_current_users:
-        team.add_to_team(user)
-
-    return redirect('account/team');
-
-
-
-
-
-# @account.route('/team_formation', methods=['GET', 'POST'])
-# @login_required
-# # @accepted_required
-# def create_team():
-#     return render_template('account/team_formation.html', form=CreateTeamForm)
-
+    return redirect(url_for('account.see_team'));

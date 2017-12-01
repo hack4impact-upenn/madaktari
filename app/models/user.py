@@ -5,6 +5,7 @@ from itsdangerous import BadSignature, SignatureExpired
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .. import db, login_manager
+from .teams import Team
 
 
 class Permission:
@@ -200,8 +201,14 @@ class User(UserMixin, db.Model):
                 db.session.rollback()
 
     def get_teams(self):
-        return [team_membership.team_id for team_membership in self.team_memberships]
+        teams = []
+        for team_membership in self.team_memberships:
+            teams.append(Team.query.get(team_membership.team_id))
+        return teams
 
+    @staticmethod
+    def get_user_fullname(user_id):
+        return User.query.get(int(user_id)).full_name()
 
     def __repr__(self):
         return '<User \'%s\'>' % self.full_name()
