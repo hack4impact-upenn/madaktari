@@ -71,9 +71,9 @@
                     numDates = numDatesIncr;
                 }
                 $("#start"+numDates.toString()).calendar({type: 'date'});
-                $("#start"+numDates.toString()).calendar('set date', new Date({{ range.start_date.year }}, {{ range.start_date.month }}, {{ range.start_date.day }}));
+                $("#start"+numDates.toString()).calendar('set date', new Date({{ range.start_date.year }}, {{ range.start_date.month }}-1, {{ range.start_date.day }}));
                 $("#end"+numDates.toString()).calendar({type: 'date'});
-                $("#end"+numDates.toString()).calendar('set date', new Date({{ range.end_date.year }}, {{ range.end_date.month }}, {{ range.end_date.day }}));
+                $("#end"+numDates.toString()).calendar('set date', new Date({{ range.end_date.year }}, {{ range.end_date.month }}-1, {{ range.end_date.day }}));
                 flag = true;
             {% endfor %}
             if (numDates === 1) {

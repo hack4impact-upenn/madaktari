@@ -316,6 +316,17 @@ def unconfirmed():
         return redirect(url_for('main.index'))
     return render_template('account/unconfirmed.html')
 
+def _merge_and_sort_intervals(ranges):
+    ranges = list(ranges)
+    ranges = sorted(ranges, key=lambda x: x['end'])
+    merged = [ranges[0]]
+    for i in range(1, len(ranges)):
+        if ranges[i]['start'] <= merged[-1]['end'] and ranges[i]['end'] > merged[-1]['end']:
+            merged[-1]['end'] = ranges[i]['end']
+        elif ranges[i]['start'] > merged[-1]['end']:
+            merged.append(ranges[i])
+    return merged
+
 @account.route('/edit_dates', methods=['GET', 'POST'])
 @login_required
 @csrf.exempt
@@ -327,8 +338,11 @@ def edit_dates():
             current_user.date_ranges.remove(r)
             db.session.delete(r)
         db.session.commit()
+        for i in range(len(ranges)):
+            ranges[i] = {'start': parser.parse(ranges[i]['start']), 'end': parser.parse(ranges[i]['end'])}
+        ranges = _merge_and_sort_intervals(ranges)
         for r in ranges:
-            new_range = DateRange(user_id=current_user.id, start_date=parser.parse(r['start']), end_date=parser.parse(r['end']))
+            new_range = DateRange(user_id=current_user.id, start_date=r['start'], end_date=r['end'])
             current_user.date_ranges.append(new_range)
         db.session.commit()
         flash('Your selected date ranges have been saved.', 'success')
