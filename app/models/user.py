@@ -62,6 +62,18 @@ referrals = db.Table(
 )
 
 
+daterange_associations = db.Table('daterange_association', db.Model.metadata, db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
+ db.Column('start_date', db.Date, db.ForeignKey('dateranges.start_date'))
+)
+
+
+class DateRange(db.Model):
+    __tablename__ = "dateranges"
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    start_date = db.Column(db.Date, index=True, primary_key=True)
+    end_date = db.Column(db.Date, index=True)
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -72,7 +84,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     responses = db.relationship('FormResponse', backref='user')
-
+    date_ranges = db.relationship("DateRange", secondary=daterange_associations)
     referrers = db.relationship("User", secondary=referrals,
                                 primaryjoin=id==referrals.c.referrer_id,
                                 secondaryjoin=id==referrals.c.candidate_id,
@@ -199,7 +211,8 @@ class User(UserMixin, db.Model):
                 first_name=fake.first_name(),
                 last_name=fake.last_name(),
                 email=fake.email(),
-                password=fake.password(),
+                # password=fake.password(),
+                password="password",
                 confirmed=True,
                 role=choice(roles),
                 **kwargs)

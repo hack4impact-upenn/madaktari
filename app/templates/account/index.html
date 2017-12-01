@@ -1,24 +1,5 @@
 {% extends 'layouts/base.html' %}
-
-{% macro dashboard_option(title, endpoint, description=None, icon=None) %}
-    <a class="column" href="{{ url_for(endpoint) }}">
-        <div class="ui padded segment">
-            <h3 class="ui header">
-                {% if icon is not none %}
-                    <i class="{{ icon }}"></i>
-                {% endif %}
-                <div class="content">
-                    {{ title }}
-                    {% if description is not none %}
-                        <div class="sub header">
-                            {{ description }}
-                        </div>
-                    {% endif %}
-                </div>
-            </h3>
-        </div>
-    </a>
-{% endmacro %}
+{% import 'macros/dash_macros.html' as d %}
 
 {% block content %}
     <div class="ui stackable centered grid container">
@@ -27,8 +8,9 @@
                 Account Dashboard
             </h2>
             <div class="ui two column stackable grid">
-                {{ dashboard_option('Refer a Candidate', 'account.refer_candidate',
+                {{ d.dashboard_option('Refer a Candidate', 'account.refer_candidate',
                                     description='Refer a new candidate for consideration', icon='users icon') }}
+                {{ d.dashboard_option('Edit Dates', 'account.edit_dates', description='Edit your available date ranges') }}
             </div>
         </div>
     </div>

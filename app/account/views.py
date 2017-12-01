@@ -2,11 +2,15 @@ from flask import flash, redirect, render_template, request, url_for
 from flask_login import (current_user, login_required, login_user,
                          logout_user)
 from flask_rq import get_queue
+import json
+from dateutil import parser
+import logging
 
 from . import account
-from .. import db
+from .. import db, csrf
 from ..email import send_email
-from ..models import User
+from ..models import User, DateRange
+from ..decorators import accepted_required
 from .forms import (ChangeEmailForm, ChangePasswordForm, CreatePasswordForm,
                     LoginForm, RegistrationForm, RequestResetPasswordForm,
                     ResetPasswordForm, ReferCandidateForm)
@@ -311,3 +315,21 @@ def unconfirmed():
     if current_user.is_anonymous or current_user.confirmed:
         return redirect(url_for('main.index'))
     return render_template('account/unconfirmed.html')
+
+@account.route('/edit_dates', methods=['GET', 'POST'])
+@login_required
+@csrf.exempt
+def edit_dates():
+    if request.method == 'POST':
+        ranges = request.json
+        existing_ranges = current_user.date_ranges
+        for r in existing_ranges:
+            current_user.date_ranges.remove(r)
+            db.session.delete(r)
+        db.session.commit()
+        for r in ranges:
+            new_range = DateRange(user_id=current_user.id, start_date=parser.parse(r['start']), end_date=parser.parse(r['end']))
+            current_user.date_ranges.append(new_range)
+        db.session.commit()
+        flash('Your selected date ranges have been saved.', 'success')
+    return render_template('account/edit_dates.html', dateranges=current_user.date_ranges)
