@@ -5,6 +5,7 @@ from itsdangerous import BadSignature, SignatureExpired
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from .. import db, login_manager
+from .teams import Team
 
 
 class Permission:
@@ -27,15 +28,15 @@ class Role(db.Model):
     @staticmethod
     def insert_roles():
         roles = {
-            'Applicant': (Permission.APPLICANT, 'main', True),
+            'Applicant': (Permission.APPLICANT, 'account', True),
             'Administrator': (
                 Permission.ADMINISTER,
                 'admin',
                 False  # grants all permissions
             ),
-            'Accepted': (Permission.ACCEPTED, 'main', True),
-            'Rejected': (Permission.REJECTED, 'main', True),
-            'Pending': (Permission.PENDING, 'main', True)
+            'Accepted': (Permission.ACCEPTED, 'account', True),
+            'Rejected': (Permission.REJECTED, 'account', True),
+            'Pending': (Permission.PENDING, 'account', True)
         }
         for r in roles:
             role = Role.query.filter_by(name=r).first()
@@ -49,10 +50,6 @@ class Role(db.Model):
 
     def __repr__(self):
         return '<Role \'%s\'>' % self.name
-
-
-# referrals = db.Table('referrals', db.Column('referrer_id', db.Integer, db.ForeignKey('users.id')),
-#                      db.Column('candidate_id', db.Integer, db.ForeignKey('users.id')))
 
 
 referrals = db.Table(
@@ -84,17 +81,12 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     date_ranges = db.relationship("DateRange", secondary=daterange_associations)
-    referrers = db.relationship("User", secondary=referrals,
+    referrers = db.relationship('User', secondary=referrals,
                                 primaryjoin=id==referrals.c.referrer_id,
                                 secondaryjoin=id==referrals.c.candidate_id,
                                 backref=db.backref('candidates', lazy='dynamic'),
                                 lazy='dynamic')
-
-        # db.Column(db.Integer, db.ForeignKey('users.id'))
-
-    # referrer = db.relationship('User', remote_side=[id])
-    #, secondary=referrals, backref=db.backref('referrals', lazy='dynamic'))
-    # candidates = db.relationship('User', secondary=referrals, backref=db.backref('referrals', lazy='dynamic'))
+    team_memberships = db.relationship('TeamMember', backref="user")
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -210,7 +202,6 @@ class User(UserMixin, db.Model):
                 first_name=fake.first_name(),
                 last_name=fake.last_name(),
                 email=fake.email(),
-                # password=fake.password(),
                 password="password",
                 confirmed=True,
                 role=choice(roles),
@@ -220,6 +211,16 @@ class User(UserMixin, db.Model):
                 db.session.commit()
             except IntegrityError:
                 db.session.rollback()
+
+    def get_teams(self):
+        teams = []
+        for team_membership in self.team_memberships:
+            teams.append(Team.query.get(team_membership.team_id))
+        return teams
+
+    @staticmethod
+    def get_user_fullname(user_id):
+        return User.query.get(int(user_id)).full_name()
 
     def __repr__(self):
         return '<User \'%s\'>' % self.full_name()

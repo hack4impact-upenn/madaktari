@@ -9,17 +9,17 @@ import logging
 from . import account
 from .. import db, csrf
 from ..email import send_email
-from ..models import User, DateRange
-from ..decorators import accepted_required
+from ..models import User, Team, DateRange
 from .forms import (ChangeEmailForm, ChangePasswordForm, CreatePasswordForm,
                     LoginForm, RegistrationForm, RequestResetPasswordForm,
                     ResetPasswordForm, ReferCandidateForm)
+from ..decorators import accepted_required
 
 
 @account.route('/')
 @login_required
 def index():
-    """Admin dashboard page."""
+    """Account dashboard page."""
     return render_template('account/index.html')
 
 
@@ -217,6 +217,24 @@ def confirm(token):
     return redirect(url_for('main.index'))
 
 
+@account.before_app_request
+def before_request():
+    """Force user to confirm email before accessing login-required routes."""
+    if current_user.is_authenticated \
+            and not current_user.confirmed \
+            and request.endpoint[:8] != 'account.' \
+            and request.endpoint != 'static':
+        return redirect(url_for('account.unconfirmed'))
+
+
+@account.route('/unconfirmed')
+def unconfirmed():
+    """Catch users with unconfirmed emails."""
+    if current_user.is_anonymous or current_user.confirmed:
+        return redirect(url_for('main.index'))
+    return render_template('account/unconfirmed.html')
+
+
 @account.route(
     '/join-from-invite/<int:user_id>/<token>', methods=['GET', 'POST'])
 def join_from_invite(user_id, token):
@@ -253,7 +271,7 @@ def join_from_invite(user_id, token):
         token = new_user.generate_confirmation_token()
         invite_link = url_for(
             'account.join_from_invite',
-            user_id=user_id,
+            user_id=new_user.id,
             token=token,
             _external=True)
         get_queue().enqueue(
@@ -299,23 +317,6 @@ def refer_candidate():
     return render_template('account/refer_candidate.html', form=form)
 
 
-@account.before_app_request
-def before_request():
-    """Force user to confirm email before accessing login-required routes."""
-    if current_user.is_authenticated \
-            and not current_user.confirmed \
-            and request.endpoint[:8] != 'account.' \
-            and request.endpoint != 'static':
-        return redirect(url_for('account.unconfirmed'))
-
-
-@account.route('/unconfirmed')
-def unconfirmed():
-    """Catch users with unconfirmed emails."""
-    if current_user.is_anonymous or current_user.confirmed:
-        return redirect(url_for('main.index'))
-    return render_template('account/unconfirmed.html')
-
 @account.route('/edit_dates', methods=['GET', 'POST'])
 @login_required
 @csrf.exempt
@@ -333,3 +334,42 @@ def edit_dates():
         db.session.commit()
         flash('Your selected date ranges have been saved.', 'success')
     return render_template('account/edit_dates.html', dateranges=current_user.date_ranges)
+
+
+@account.route('/find_teammates', methods=['GET', 'POST'])
+@login_required
+def find_teammates():
+    accepted_users = User.query.filter_by(role_id=3)
+    # remove current user
+    accepted_users = [u for u in accepted_users if u.id != current_user.id]
+    teams = current_user.get_teams()
+    return render_template('account/accepted_users.html', users=accepted_users, teams=teams)
+
+
+@account.route('/team', methods=['GET', 'POST'])
+@login_required
+def see_team():
+    teams = current_user.get_teams()
+    print("teams: ")
+    print(teams)
+    return render_template('account/team.html', teams=teams, User=User)
+
+
+@account.route('/add_to_team', methods=['GET', 'POST'])
+def add_to_team():
+    user_id = request.args.get('user_id')
+    team_id = request.args.get('team_id')
+    new_team_name = request.args.get('new_team_name')
+
+    if team_id == "new_team":
+        team = Team(current_user, new_team_name)
+        db.session.add(team)
+        db.session.commit()
+    else:
+        team = Team.query.get(team_id)
+
+    user = User.query.get(user_id)
+    team.add_to_team(user)
+
+    return redirect(url_for('account.see_team'));
+

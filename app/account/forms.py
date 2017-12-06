@@ -5,8 +5,10 @@ from wtforms.fields import (BooleanField, PasswordField, StringField,
                             SubmitField)
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import Email, EqualTo, InputRequired, Length
+from wtforms.ext.sqlalchemy.fields import QuerySelectMultipleField
 
 from ..models import User
+from .. import db
 
 
 class LoginForm(Form):
@@ -111,3 +113,4 @@ class ReferCandidateForm(Form):
     def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
             raise ValidationError('Email already registered.')
+

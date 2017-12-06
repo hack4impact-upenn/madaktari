@@ -9,8 +9,11 @@
             </h2>
             <div class="ui two column stackable grid">
                 {{ d.dashboard_option('Refer a Candidate', 'account.refer_candidate',
-                                    description='Refer a new candidate for consideration', icon='users icon') }}
-                {{ d.dashboard_option('Edit Dates', 'account.edit_dates', description='Edit your available date ranges') }}
+                                    description='Refer a new candidate for consideration', icon='add user icon') }}
+                {{ d.dashboard_option('Find Teammates', 'account.find_teammates',
+                                    description='See accepted users to find a teammates', icon='users icon') }}
+                {{ d.dashboard_option('Edit Dates', 'account.edit_dates',
+                                    description='Edit your available date ranges', icon='calendar icon') }}
             </div>
         </div>
     </div>
