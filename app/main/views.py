@@ -72,7 +72,7 @@ def index():
 
 
 @main.route('/form')
-def signup():
+def form():
     content = None
     form_resp_obj = []
     try:

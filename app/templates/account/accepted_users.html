@@ -3,53 +3,73 @@
 {% block content %}
     <div class="ui stackable grid container">
         <div class="sixteen wide tablet twelve wide computer centered column">
-            <a class="ui basic compact button" href="{{ url_for('admin.index') }}">
-                <i class="caret left icon"></i>
-                Back to dashboard
-            </a>
+
             <h2 class="ui header">
-                Accepted Users
+                Team Formation
                 <div class="sub header">
-                    View and manage currently registered users.
+                    Manage your teams.
                 </div>
             </h2>
 
-            <div class="ui menu">
-                <div class="ui right search item">
-                    <div class="ui transparent icon input">
-                        <input id="search-users" type="text" placeholder="Search users…">
-                        <i class="search icon"></i>
-                    </div>
-                </div>
+            <div class="ui top attached tabular menu">
+                <a class="item active" data-tab="create-team">Create Team</a>
+                <a class="item" data-tab="review-teams">Review Teams</a>
             </div>
 
-            {# Use overflow-x: scroll so that mobile views don't freak out
-             # when the table is too wide #}
-            <div style="overflow-x: scroll;">
-                <table class="ui searchable sortable unstackable selectable celled table">
-                    <thead>
-                        <tr>
-                            <th>First name</th>
-                            <th class="sorted ascending">Last name</th>
-                            <th>Email address</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for u in users | sort(attribute='last_name') %}
-                        <tr>
-                            <td>{{ u.first_name }}</td>
-                            <td>{{ u.last_name }}</td>
-                            <td><a href="mailto:{{u.email}}">{{ u.email }}</td>
-                            <td>
-                                <button class="ui button" onclick="enable_modal('{{ u.full_name() }}', {{ u.id }})">Add to Team</button>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+            <div class="ui bottom attached tab segment active" data-tab="create-team">
+                <div class="ui menu">
+                    <div class="ui right search item">
+                        <div class="ui transparent icon input">
+                            <input id="search-users" type="text" placeholder="Search users…">
+                            <i class="search icon"></i>
+                        </div>
+                    </div>
+                </div>
+
+                {# Use overflow-x: scroll so that mobile views don't freak out
+                 # when the table is too wide #}
+                <div style="overflow-x: scroll;">
+                    <table class="ui searchable sortable unstackable selectable celled table">
+                        <thead>
+                            <tr>
+                                <th>First name</th>
+                                <th class="sorted ascending">Last name</th>
+                                <th>Email address</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for u in users | sort(attribute='last_name') %}
+                            <tr>
+                                <td>{{ u.first_name }}</td>
+                                <td>{{ u.last_name }}</td>
+                                <td><a href="mailto:{{u.email}}">{{ u.email }}</td>
+                                <td>
+                                    <button class="ui button" onclick="enable_modal('{{ u.full_name() }}', {{ u.id }})">Add to Team</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="ui bottom attached tab segment" data-tab="review-teams">
+                {% for team in teams %}
+                    <div class="ui segment">
+                        <h3 class="ui header">{{ team.team_name }}</h3>
+
+                        <div class="ui bulleted list">
+                        {% for member in team.team_members %}
+                            <div class="item">{{ User.get_user_fullname(member.user_id) }}</div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
         </div>
+{#        <div class="sixteen wide tablet twelve wide computer centered column">#}
+{##}
+{#        </div>#}
     </div>
 
     <div class="ui modal">
@@ -61,7 +81,7 @@
         <div class="ui grid">
             <div class="two wide column"></div>
             <div class="ten wide column">
-                <form class="ui form" action="{{ url_for('account.add_to_team') }}" methods="POST">
+                <form class="ui form" action="{{ url_for('team.add_to_team') }}" methods="POST">
                     <input type="hidden" name="user_id" id="user_id_input">
                     <div class="field">
                         <label>Team</label>
@@ -134,5 +154,10 @@
             $('#user_to_add').text(user_fullname);
             $('#user_id_input').attr("value", user_id);
         }
+    </script>
+    <script>
+        $('.menu .item')
+            .tab()
+        ;
     </script>
 {% endblock %}

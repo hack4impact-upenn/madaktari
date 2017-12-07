@@ -9,7 +9,7 @@
             </h2>
             <div class="ui two column stackable grid">
                 {% if current_user.can(Permission.APPLICANT) %}
-                    {{ d.dashboard_option('Review Application', 'account.refer_candidate',
+                    {{ d.dashboard_option('Review Application', 'main.form',
                                         description='Review your application to Madaktari', icon='file text outline icon') }}
                 {% endif %}
                 {% if current_user.can(Permission.ACCEPTED) %}
@@ -17,8 +17,8 @@
                                         description='Review your volunteer profile', icon='doctor icon') }}
                 {% endif %}
                 {% if current_user.can(Permission.ACCEPTED) %}
-                    {{ d.dashboard_option('Team Formation', 'account.find_teammates',
-                                        description='Create a team for a Madaktari trip', icon='doctor icon') }}
+                    {{ d.dashboard_option('Team Formation', 'team.index',
+                                        description='Create a team for a Madaktari trip', icon='users icon') }}
                 {% endif %}
             </div>
         </div>
