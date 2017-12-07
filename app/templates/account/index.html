@@ -8,12 +8,18 @@
                 Account Dashboard
             </h2>
             <div class="ui two column stackable grid">
-                {{ d.dashboard_option('Refer a Candidate', 'account.refer_candidate',
-                                    description='Refer a new candidate for consideration', icon='add user icon') }}
-                {{ d.dashboard_option('Find Teammates', 'account.find_teammates',
-                                    description='See accepted users to find a teammates', icon='users icon') }}
-                {{ d.dashboard_option('Edit Dates', 'account.edit_dates',
-                                    description='Edit your available date ranges', icon='calendar icon') }}
+                {% if current_user.can(Permission.APPLICANT) %}
+                    {{ d.dashboard_option('Review Application', 'account.refer_candidate',
+                                        description='Review your application to Madaktari', icon='file text outline icon') }}
+                {% endif %}
+                {% if current_user.can(Permission.ACCEPTED) %}
+                    {{ d.dashboard_option('Review Profile', 'account.edit_dates',
+                                        description='Review your volunteer profile', icon='doctor icon') }}
+                {% endif %}
+                {% if current_user.can(Permission.ACCEPTED) %}
+                    {{ d.dashboard_option('Team Formation', 'account.find_teammates',
+                                        description='Create a team for a Madaktari trip', icon='doctor icon') }}
+                {% endif %}
             </div>
         </div>
     </div>

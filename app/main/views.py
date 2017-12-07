@@ -13,6 +13,25 @@ from .forms import LoginForm, RegistrationForm
 
 @main.route('/', methods=['GET', 'POST'])
 def index():
+
+    # redirect if already logged in
+    # TODO: redirect to proper stage
+    if current_user.is_authenticated:
+        if current_user.is_role('Applicant'):
+            return redirect(url_for('account.index'))
+
+        elif current_user.is_role('Pending'):
+            return redirect(url_for('account.index'))
+
+        elif current_user.is_role('Accepted'):
+            return redirect(url_for('account.index'))
+
+        elif current_user.is_role('Rejected'):
+            return redirect(url_for('account.index'))
+
+        elif current_user.is_role('Administrator'):
+            return redirect(url_for('account.index'))
+
     # Log in an existing user.
     login_form = LoginForm()
     if login_form.validate_on_submit():
