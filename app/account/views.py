@@ -9,7 +9,7 @@ import logging
 from . import account
 from .. import db, csrf
 from ..email import send_email
-from ..models import User, Team, DateRange
+from ..models import User, Team, DateRange, Permission
 from .forms import (ChangeEmailForm, ChangePasswordForm, CreatePasswordForm,
                     LoginForm, RegistrationForm, RequestResetPasswordForm,
                     ResetPasswordForm, ReferCandidateForm)
@@ -20,7 +20,7 @@ from ..decorators import accepted_required
 @login_required
 def index():
     """Account dashboard page."""
-    return render_template('account/index.html')
+    return render_template('account/index.html', Permission=Permission)
 
 
 @account.route('/login', methods=['GET', 'POST'])
