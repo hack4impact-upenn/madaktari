@@ -9,7 +9,7 @@ from . import admin
 from .. import db, csrf
 from ..decorators import admin_required
 from ..email import send_email
-from ..models import Role, User, EditableHTML, Form
+from ..models import Role, User, EditableHTML, Form, FormResponse
 import json
 import jsonpickle
 
@@ -32,8 +32,7 @@ def new_user():
         user = User(
             role=form.role.data,
             first_name=form.first_name.data,
-            last_name=form.last_name.data,
-            email=form.email.data,
+            last_name=form.last_name.data, email=form.email.data,
             password=form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -192,10 +191,16 @@ def update_editor_contents():
 @login_required
 @admin_required
 def create_form_index():
-    f = Form.get_form_content()
     form = {}
-    if f is not None:
-        form = json.dumps(jsonpickle.decode(f.content))
+    try:
+        f = Form.get_form_content()
+        if f is not None:
+            print(f)
+            form = json.dumps(jsonpickle.decode(f))
+            form = form.replace("'", '')
+    except Exception as e:
+        print(e)
+        form = {}
     return render_template('admin/create_form.html', form=form)
 
 
@@ -207,3 +212,57 @@ def update_form():
     db.session.add(form)
     db.session.commit()
     return jsonify({'status': 200})
+
+
+@admin.route('/view-responses', methods=['GET'])
+@login_required
+@admin_required
+def get_responses():
+    responses = FormResponse.query.all()
+    r_set = []
+    for r in responses:
+        if r.user.is_role('Pending'):
+            is_in = False
+            for rs in r_set:
+                if r.user_id == rs.user_id:
+                    is_in = True
+                    break
+            if is_in is False:
+                print(r_set)
+                r_set.append(r)
+    return render_template('admin/view_responses.html', responses=r_set)
+
+
+@admin.route('/view-response/<int:user_id>', methods=['GET','POST'])
+@login_required
+@admin_required
+def get_response(user_id):
+    r = FormResponse.query.filter_by(user_id=user_id).order_by('id desc').first()
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        abort(404)
+    form_resp_obj = []
+    raw_form_content = ''
+    if r.form:
+        raw_form_content = r.form.content
+    raw_form_resp = r.content
+    if raw_form_content and raw_form_resp:
+        form_content = jsonpickle.decode(raw_form_content)
+        form_resp = jsonpickle.decode(raw_form_resp)
+        for k in form_resp:
+            k_new = k.replace('[]', '')
+            for idx, x in enumerate(form_content):
+                try:
+                    if x['name'] == k_new:
+                        form_resp_obj.append({'idx': idx, 'label': x['label'], 'resp': form_resp[k]})
+                except:
+                    pass
+        form_resp_obj = sorted(form_resp_obj, key=lambda k: k['idx'])
+    form = ChangeAccountTypeForm()
+    if form.validate_on_submit():
+        user.role = form.role.data
+        db.session.add(user)
+        db.session.commit()
+        flash('User status {} successfully changed to {}.'
+              .format(user.full_name(), user.role.name), 'form-success')
+    return render_template('admin/form_response.html', form_resp_obj=form_resp_obj, user=user, form=form)

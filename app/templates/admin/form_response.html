@@ -1,0 +1,47 @@
+{% extends 'layouts/base.html' %}
+{% import 'macros/form_macros.html' as f %}
+
+{% block scripts %}
+{% endblock %}
+
+{% block content %}
+    <div class="ui stackable centered grid container">
+        <div class="twelve wide column">
+            <a class="ui basic compact button" href="{{ url_for('admin.index') }}">
+                <i class="caret left icon"></i>
+                Back to dashboard
+            </a>
+            <h2 class="ui header">
+                Application Response
+                <div class="sub header">View the volunteer application form</div>
+            </h2>
+        </div>
+    </div>
+    <br/>
+    <div>
+    <div class="ui stackable centered grid container">
+      <div class="row">
+      <div class="twelve wide column">
+        <table class="ui compact definition table">
+            <tr><td>Full name</td><td>{{ '%s %s' % (user.first_name, user.last_name) }}</td></tr>
+            <tr><td>Email address</td><td>{{ user.email }}</td></tr>
+            <tr><td>Account status</td><td>{{ user.role.name }}</td></tr>
+        </table>
+        {% if form %}
+        {{ f.render_form(form) }}
+        {% endif %}
+      </div>
+      </div>
+      <div class="row">
+      <div class="twelve wide column">
+        {% for f in form_resp_obj %}
+        <div>
+          <h2><strong>{{ loop.index }}. {{ f['label'] }}</strong></h2>
+          {% if f['resp'] is string %} <h4>{{ f['resp'] }}</h4> {% else %} <h4> {% for r in f['resp'] %} <p> {{ r }} </p> {% endfor %} </h4> {% endif %}
+        </div>
+        <br><br>
+        {% endfor %}
+      </div>
+    </div>
+    </div>
+{% endblock %}

@@ -80,6 +80,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    responses = db.relationship('FormResponse', backref='user')
     date_ranges = db.relationship("DateRange", secondary=daterange_associations)
     referrers = db.relationship('User', secondary=referrals,
                                 primaryjoin=id==referrals.c.referrer_id,
