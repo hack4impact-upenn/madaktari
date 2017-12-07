@@ -8,25 +8,13 @@
                 Back to dashboard
             </a>
             <h2 class="ui header">
-                Registered Users
+                Form Responses
                 <div class="sub header">
-                    View and manage currently registered users.
+                    View and manage current form responses
                 </div>
             </h2>
 
             <div class="ui menu">
-                <div id="select-role" class="ui dropdown item">
-                    <div class="text">
-                        All account types
-                    </div>
-                    <i class="dropdown icon"></i>
-                    <div class="menu">
-                        <div class="item" data-value="">All account types</div>
-                        {% for r in roles %}
-                            <div class="item" data-value="{{ r.name }}">{{ r.name }}s</div>
-                        {% endfor %}
-                    </div>
-                </div>
                 <div class="ui right search item">
                     <div class="ui transparent icon input">
                         <input id="search-users" type="text" placeholder="Search users…">
@@ -44,20 +32,17 @@
                             <th>First name</th>
                             <th class="sorted ascending">Last name</th>
                             <th>Email address</th>
-                            <th>Account type</th>
-                            <th>Referrers</th>
-                            <th>Candidates Referred</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                    {% for u in users | sort(attribute='last_name') %}
-                        <tr onclick="window.location.href = '{{ url_for('admin.user_info', user_id=u.id) }}';">
-                            <td>{{ u.first_name }}</td>
-                            <td>{{ u.last_name }}</td>
-                            <td>{{ u.email }}</td>
-                            <td class="user role">{{ u.role.name }}</td>
-                            {# <td> {% for user in u.referrers | user.full_name() %} </td>
-                            <td> {% for user in u.candidates | user.full_name() %} </td> #}
+                    {% for r in responses  %}
+                        <tr onclick="window.location.href = '{{ url_for('admin.get_response', user_id=r.user_id) }}';">
+
+                            <td>{{ r.user.first_name }}</td>
+                            <td>{{ r.user.last_name }}</td>
+                            <td>{{ r.user.email }}</td>
+                            <td>{{ r.user.role.name }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
