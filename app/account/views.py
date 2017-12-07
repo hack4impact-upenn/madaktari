@@ -291,7 +291,6 @@ def refer_candidate():
     form = ReferCandidateForm()
     if form.validate_on_submit():
         user = User(
-            role=form.role.data,
             first_name=form.first_name.data,
             last_name=form.last_name.data,
             email=form.email.data)
