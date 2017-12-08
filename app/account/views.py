@@ -9,10 +9,10 @@ import logging
 from . import account
 from .. import db, csrf
 from ..email import send_email
-from ..models import User, Team, DateRange, Permission
+from ..models import User, Team, DateRange, Permission, Profile
 from .forms import (ChangeEmailForm, ChangePasswordForm, CreatePasswordForm,
                     LoginForm, RegistrationForm, RequestResetPasswordForm,
-                    ResetPasswordForm)
+                    ResetPasswordForm, ProfileForm)
 from ..decorators import accepted_required
 
 
@@ -283,6 +283,40 @@ def join_from_invite(user_id, token):
             invite_link=invite_link)
     return redirect(url_for('main.index'))
 
+
+@account.route('/edit_profile', methods=['GET', 'POST'])
+@login_required
+@csrf.exempt
+def edit_profile():
+    form = ProfileForm()
+    if form.validate_on_submit():
+        user = Profile(
+            degrees=form.degrees.data,
+            location=form.location.data,
+            experience_abroad=form.experience_abroad.data,
+            contact_email=form.email.data,
+            contact_phone=form.phone.data,
+            linkedin=form.linkedin.data,
+            cv_link=form.cv_link.data,
+            user_id=current_user.id)
+        db.session.add(user)
+        current_user.email = form.email.data
+        db.session.commit()
+        return redirect(url_for('account.edit_profile'))
+    profile = Profile.query.filter_by(user_id=current_user.id).first()
+    if profile:
+        form.degrees.data = profile.degrees
+        form.location.data = profile.location
+        form.experience_abroad.data = profile.experience_abroad
+        form.email.data = profile.contact_email
+        form.phone.data = profile.contact_phone
+        form.linkedin.data = profile.linkedin
+        form.cv_link.data = profile.cv_link
+    else:
+        form.email.data = current_user.email
+    print(form)
+    return render_template('account/edit_profile.html', form=form)
+    
 
 @account.route('/edit_dates', methods=['GET', 'POST'])
 @login_required
