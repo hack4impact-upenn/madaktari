@@ -71,6 +71,11 @@ def index():
                            registration_form=registration_form, login_form=login_form)
 
 
+@main.route('/playground')
+def playground():
+    return render_template('main/playground.html')
+
+
 @main.route('/form')
 def form():
     content = None
