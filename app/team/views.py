@@ -9,12 +9,12 @@ from ..models import User, Team, Role
 @team.route('/')
 @login_required
 def index():
-    """ TODO: Teams primary page"""
+    """ Primary Page for Teams View """
     accepted_role = Role.query.filter_by(name='Accepted').first()
     accepted_users = db.session.query(User).filter(User.role == accepted_role
                                                    and User.id != current_user.id)  # remove current user
     teams = current_user.get_teams()
-    return render_template('account/accepted_users.html', users=accepted_users, teams=teams, User=User)
+    return render_template('team/index.html', users=accepted_users, teams=teams, User=User)
 
 
 @team.route('/add_to_team', methods=['GET', 'POST'])
@@ -33,5 +33,5 @@ def add_to_team():
     user = User.query.get(user_id)
     target_team.add_to_team(user)
 
-    return redirect(url_for('team.index'));
+    return redirect(url_for('team.index'))
 
