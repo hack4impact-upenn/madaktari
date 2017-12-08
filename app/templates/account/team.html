@@ -24,9 +24,13 @@
                     {% else %}
                     <a class="ui button red" href="{{ url_for('admin.toggle_confirmation', team_id=team.id) }}">Unconfirm this team</a>
                     {% endif %}
+                    <a href="{{ url_for('admin.remind_team', team_id=team.id) }}" class="ui button purple" href="">Remind team to finish tasks</a>
                     {% endif %}
                     {% if current_user.is_admin() %}
                     <button class="ui button blue" id="add_todo" data-teamid="{{ team.id }}">Add a todo item to this team</button>
+                    {% endif %}
+                    {% if current_user.is_admin() == False %}
+                    <a class="ui button green" href="{{ url_for('admin.submit_team', team_id=team.id) }}">Submit team to administrator for review</a>
                     {% endif %}
                     <br>
                     Todos:

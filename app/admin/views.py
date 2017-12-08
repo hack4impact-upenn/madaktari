@@ -330,3 +330,40 @@ def delete_todo(todo_id):
     db.session.commit()
     flash('Successfully deleted todo', 'success')
     return redirect(url_for('admin.view_all_teams'))
+
+@admin.route('/todos/<int:team_id>/remind', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def remind_team(team_id):
+    team = Team.query.get(team_id)
+    tasks = [x.description for x in team.team_todos if x.is_done is False]
+    print(tasks)
+    for m in team.team_members:
+        email = m.user.email
+        get_queue().enqueue(
+                send_email,
+                recipient=email,
+                subject='You have remaining todo items for your madaktari team!',
+                template='admin/email/remind_email',
+                team=team,
+                tasks=tasks)
+
+    flash('Reminding all team members!', 'success')
+    return redirect(url_for('admin.view_all_teams'))
+
+@admin.route('/team/<int:team_id>/submit', methods=['GET', 'POST'])
+@login_required
+def submit_team(team_id): 
+    team = Team.query.get(team_id)
+    admins = Role.query.filter_by(name='Administrator')[0].users.all()
+    if admins is not None:
+        for a in admins:
+            email = a.email
+            get_queue().enqueue(
+                    send_email,
+                    recipient=email,
+                    subject='A team is ready to be confirmed',
+                    template='admin/email/submitted_email',
+                    team=team)
+    flash('Successfully notified administrators', 'success')
+    return redirect(url_for('admin.view_all_teams'))
