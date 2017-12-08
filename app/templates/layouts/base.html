@@ -34,6 +34,17 @@
         {% endblock %}
 
         {% include 'partials/_flashes.html' %}
+        <div class="page-header">
+          <div class="header-overlay"></div>
+          <div class="header-content">
+            <div class="header-title">
+              <h1>{% block title %}page title {% endblock %}</h1>
+            </div>
+            <div class="header-description">
+              <p>{% block description %} page description{% endblock %}</p>
+            </div>
+          </div>
+        </div>
         {# When extended, the content block contains all the html of the webpage #}
         {% block content %}
         {% endblock %}

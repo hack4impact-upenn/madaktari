@@ -30,3 +30,32 @@ nav .mobile.only.row {
 table.selectable tr:hover {
     cursor: pointer !important;
 }
+
+.page-header {
+  min-height: 50vh;
+  background: url(/static/images/madaktari.png) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  position: relative;
+}
+
+.header-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height:  100%;
+  background-color: rgba(0,0,0,.50);
+  z-index: 0;
+}
+
+.header-content {
+  color: white;
+  z-index: 1;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+}

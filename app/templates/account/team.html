@@ -3,7 +3,7 @@
 {% block content %}
     <div class="ui stackable grid container">
         <div class="sixteen wide tablet twelve wide computer centered column">
-            <a class="ui basic compact button" href="{{ url_for('admin.index') }}">
+            <a class="ui basic compact button" href="{{ url_for('account.index') }}">
                 <i class="caret left icon"></i>
                 Back to dashboard
             </a>
@@ -20,7 +20,7 @@
 
                     <div class="ui bulleted list">
                     {% for member in team.team_members %}
-                        <div class="item">{{ User.get_user_fullname(member.user_id) }}</div>
+                    <div class="item">{{ User.get_user_fullname(member.user_id) }} <a href="{{ url_for('account.remove_member', team_id=team.id, user_id=member.user_id ) }}">Remove Member</a></div>
                     {% endfor %}
                     </div>
                 </div>
