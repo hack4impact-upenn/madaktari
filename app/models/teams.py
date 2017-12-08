@@ -6,6 +6,7 @@ class Team(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     team_name = db.Column(db.String(64), index=True)
     team_members = db.relationship('TeamMember', backref="team")
+    team_todos = db.relationship('TeamTodo', backref="team")
     is_confirmed = db.Column(db.Boolean)
 
     def __init__(self, user, team_name):

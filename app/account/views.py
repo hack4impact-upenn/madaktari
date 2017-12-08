@@ -402,3 +402,21 @@ def remove_member(team_id, user_id):
     flash('{} was succesfully deleted'
           .format(User.query.get(user_id).last_name , 'form-success'))
     return redirect(url_for('account.see_team'))
+
+@account.route('/team/<int:team_id>/make-owner/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def make_owner(team_id, user_id):
+    """Change a team's email."""
+    team = Team.query.filter_by(id=team_id).first()
+    l = team.team_members
+    for t in l:
+        if t.user_id == user_id:
+            t.is_owner = True
+        else:
+            t.is_owner = False
+        db.session.add(t)
+        db.session.commit()
+    flash('{} was succesfully made an owner'
+          .format(User.query.get(user_id).last_name , 'form-success'))
+    return redirect(url_for('account.see_team'))
+
