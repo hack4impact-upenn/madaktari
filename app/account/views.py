@@ -12,7 +12,7 @@ from ..email import send_email
 from ..models import User, Team, DateRange, Permission
 from .forms import (ChangeEmailForm, ChangePasswordForm, CreatePasswordForm,
                     LoginForm, RegistrationForm, RequestResetPasswordForm,
-                    ResetPasswordForm, ReferCandidateForm)
+                    ResetPasswordForm)
 from ..decorators import accepted_required
 
 
@@ -282,39 +282,6 @@ def join_from_invite(user_id, token):
             user=new_user,
             invite_link=invite_link)
     return redirect(url_for('main.index'))
-
-
-@account.route('/refer_candidate', methods=['GET', 'POST'])
-@login_required
-def refer_candidate():
-    """Invites a new user to create an account and set their own password."""
-    form = ReferCandidateForm()
-    if form.validate_on_submit():
-        user = User(
-            role=form.role.data,
-            first_name=form.first_name.data,
-            last_name=form.last_name.data,
-            email=form.email.data)
-        current_user.candidates.append(user)
-        user.referrers.append(current_user)
-        db.session.add(user)
-        db.session.commit()
-        token = user.generate_confirmation_token()
-        invite_link = url_for(
-            'account.join_from_invite',
-            user_id=user.id,
-            token=token,
-            _external=True)
-        get_queue().enqueue(
-            send_email,
-            recipient=user.email,
-            subject='You Are Invited To Join',
-            template='account/email/invite',
-            user=user,
-            invite_link=invite_link, )
-        flash('Candidate {} successfully referred'.format(user.full_name()),
-              'form-success')
-    return render_template('account/refer_candidate.html', form=form)
 
 
 @account.route('/edit_dates', methods=['GET', 'POST'])

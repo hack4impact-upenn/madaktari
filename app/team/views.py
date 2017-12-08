@@ -1,12 +1,15 @@
 from flask import redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
+from flask_rq import get_queue
 from . import team
 from .. import db
 from ..models import User, Team, Role
 
+from .forms import (ReferCandidateForm)
 
-@team.route('/')
+
+@team.route('/',  methods=['GET', 'POST'])
 @login_required
 def index():
     """ Primary Page for Teams View """
@@ -14,7 +17,67 @@ def index():
     accepted_users = db.session.query(User).filter(User.role == accepted_role
                                                    and User.id != current_user.id)  # remove current user
     teams = current_user.get_teams()
-    return render_template('team/index.html', users=accepted_users, teams=teams, User=User)
+    form = ReferCandidateForm()
+    if form.validate_on_submit():
+        applicant_role = Role.query.filter_by(name='Applicant').first()
+        user = User(
+            role=applicant_role,
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            email=form.email.data)
+        current_user.candidates.append(user)
+        user.referrers.append(current_user)
+        db.session.add(user)
+        db.session.commit()
+        token = user.generate_confirmation_token()
+        invite_link = url_for(
+            'account.join_from_invite',
+            user_id=user.id,
+            token=token,
+            _external=True)
+        get_queue().enqueue(
+            send_email,
+            recipient=user.email,
+            subject='You Are Invited To Join',
+            template='account/email/invite',
+            user=user,
+            invite_link=invite_link, )
+        flash('Candidate {} successfully referred'.format(user.full_name()),
+              'form-success')
+    return render_template('team/index.html', users=accepted_users, teams=teams, User=User, form=form)
+
+
+
+def refer_candidate():
+    """Invites a new user to create an account and set their own password."""
+    form = ReferCandidateForm()
+    if form.validate_on_submit():
+        applicant_role = Role.query.filter_by(name='Applicant').first()
+        user = User(
+            role=applicant_role,
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            email=form.email.data)
+        current_user.candidates.append(user)
+        user.referrers.append(current_user)
+        db.session.add(user)
+        db.session.commit()
+        token = user.generate_confirmation_token()
+        invite_link = url_for(
+            'account.join_from_invite',
+            user_id=user.id,
+            token=token,
+            _external=True)
+        get_queue().enqueue(
+            send_email,
+            recipient=user.email,
+            subject='You Are Invited To Join',
+            template='account/email/invite',
+            user=user,
+            invite_link=invite_link, )
+        flash('Candidate {} successfully referred'.format(user.full_name()),
+              'form-success')
+    return form
 
 
 @team.route('/add_to_team', methods=['GET', 'POST'])
@@ -34,4 +97,6 @@ def add_to_team():
     target_team.add_to_team(user)
 
     return redirect(url_for('team.index'))
+
+
 
