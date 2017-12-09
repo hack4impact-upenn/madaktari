@@ -6,6 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from .. import db, login_manager
 from .teams import Team
+from .profiles import Profile
 
 
 class Permission:
@@ -80,6 +81,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(64), unique=True, index=True)
     password_hash = db.Column(db.String(128))
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    profile = db.relationship('Profile', backref='role', lazy='dynamic')
     responses = db.relationship('FormResponse', backref='user')
     date_ranges = db.relationship("DateRange", secondary=daterange_associations)
     referrers = db.relationship('User', secondary=referrals,
