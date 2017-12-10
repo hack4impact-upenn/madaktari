@@ -1,0 +1,186 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+Main page
+{% endblock %}
+
+{% block description %}
+This is going to be the main page 
+{% endblock %}
+
+{% block content %}
+    <div class="ui text container">
+      <h1>Hello {% if not (current_user.is_authenticated) %} world {% else %} {{ current_user.full_name() }}. Your role is {{ current_user.role.name }}. {% endif %}</h1>
+      {% if current_user.is_authenticated %} 
+      {% if current_user.is_role("applicant") and content is not none %}
+        <div id="fb-render"></div>
+        <form id="submitForm">
+          <input type='submit' class='btn btn-success' value='Submit Form'/>
+        </form>
+<div class="ui basic modal">
+  <div class="ui icon header">
+    <i class="upload icon"></i>
+    Upload Progress
+  </div>
+  <div class="content">
+    <h2><span id="progress"></span>%</h2>
+    <p>We are uploading your file!</p>
+  </div>
+  <div class="actions">
+    <div class="ui green ok inverted button">
+      <i class="checkmark icon"></i>
+      Dismiss
+    </div>
+  </div>
+</div>
+        <script src="http://formbuilder.online/assets/js/form-render.min.js"></script>
+        <script>
+          var files = {};
+          jQuery(function($) {
+            var fbRender = document.getElementById('fb-render');
+            var formData = {{ content | safe }}
+            var formRenderOpts = {
+              formData
+            };
+            $(fbRender).formRender(formRenderOpts);
+            $('body').on('change', 'input:file', function() {
+              var file = $(this)[0].files[0];
+              getSignedRequest(file, this.name);
+            })
+            $("#submitForm").submit(function(e) {
+              e.preventDefault();
+              var o = {};
+              var a = $("#fb-render :input").serializeArray();
+              for(var i =  0; i < Object.keys(files).length; i++) {
+                var str = Object.keys(files)[i];
+                a.push({ name: str, value: files[Object.keys(files)[i]] });
+              }
+              console.log(a)
+              $.each(a, function() {
+                if (o[this.name] !== undefined) {
+                  if (!o[this.name].push) {
+                    o[this.name] = [o[this.name]];
+                  }
+                  o[this.name].push(this.value || '');
+                }
+                else {
+                  o[this.name] = this.value || '';
+                }
+              });
+              var settings = {
+                  "async": true,
+                  "crossDomain": true,
+                  "url": "/submit-form",
+                  "method": "POST",
+                  "headers": {
+                    "content-type": "application/json",
+                    "cache-control": "no-cache",
+                  },
+                  "processData": false,
+                  "data": JSON.stringify(o)
+              };
+              $.ajax(settings).done(function (response) {
+                alert("successfully submitted form");
+                location.reload()
+              });
+            });
+          });
+function uploadFile(file, s3Data, url, urlUpload, fieldName){
+  // basic validation
+  var fileType = url.substring(url.lastIndexOf('.') + 1);
+
+  var xhr = new XMLHttpRequest();
+  xhr.upload.addEventListener("progress", updateProgress);
+  xhr.open('POST', urlUpload);
+  xhr.setRequestHeader('x-amz-acl', 'public-read');
+
+  var postData = new FormData();
+  for(key in s3Data.fields){
+    postData.append(key, s3Data.fields[key]);
+  }
+  postData.append('file', file);
+  console.log(file);
+  $('.ui.basic.modal')
+    .modal('show')
+  ;
+  function updateProgress (e) {
+    if (e.lengthComputable) {
+      var percentComplete = ((100*e.loaded)/e.total).toFixed(2);
+      var percentCompleteShort = ((100*e.loaded)/e.total).toFixed(0);
+      $('#progress').text(percentCompleteShort);
+    }
+  }
+  xhr.onreadystatechange = function()  {
+    if(xhr.readyState === 4){
+      if(xhr.status === 200 || xhr.status === 204) {
+        handleFunc(url, fieldName);
+      }
+      else{
+        console.log("\n\n\nstatus: ", xhr.status);
+        alert('Could not upload file.');
+      }
+    }
+  };
+  xhr.send(postData);
+}
+
+function handleFunc(url, fieldName) {
+  files[fieldName] = url;
+  console.log(files)
+};
+
+/*
+      Function to get the temporary signed request from the Python app.
+      If request successful, continue to upload the file using this signed
+      request.
+ */
+function getSignedRequest(file, fieldName){
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', `/sign-s3?file-name=${file.name}&file-type=${file.type}`);
+  xhr.onreadystatechange = function() {
+    if(xhr.readyState === 4){
+      if(xhr.status === 200){
+        var response = JSON.parse(xhr.responseText);
+        console.log("response form json dumps: ", response);
+        uploadFile(file, response.data, response.url, response.url_upload, fieldName)
+      }
+      else{
+        alert('Could not get signed URL.');
+      }
+    }
+  };
+  xhr.send();
+}
+        </script>
+        {% elif current_user.is_role("pending") %}
+          <h1>Application Responses</h1>
+<div class="ui divider"></div>
+          <div class="sixteen wide column">
+            {% for f in form_resp_obj %}
+            <div>
+              <h3><strong>{{ loop.index }}. {{ f['label'] }}</strong></h3>
+              {% if f['resp'] is string %} 
+              {% if 'http' in f['resp'] %}
+              <a href="{{ f['resp'] }}">{{ f['resp'] }}</a>
+              {% else %}
+              <p>
+                {{ f['resp'] }}
+              </p> 
+              {% endif %}
+              {% else %}
+              <p> 
+                {% for r in f['resp'] %} 
+                <p> {{ r }} </p> 
+                {% endfor %} 
+              </p> 
+              {% endif %}
+            </div>
+<div class="ui divider"></div>
+            {% endfor %}
+            <a class="ui button red" href="{{ url_for('main.edit_form') }}">Discard form responses & Withdraw Application</a>
+          </div>
+          {% endif %}
+        {% endif %}
+        
+    </div>
+{% endblock %}
