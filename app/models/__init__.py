@@ -7,3 +7,4 @@ from .user import *  # noqa
 from .miscellaneous import *  # noqa
 from .forms import *  # noqa
 from .teams import * # noqa
+from .profiles import *

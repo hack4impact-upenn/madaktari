@@ -1,12 +1,13 @@
 from flask import url_for
+from flask_login import current_user
 from flask_wtf import Form
 from wtforms import ValidationError
 from wtforms.fields import (BooleanField, PasswordField, StringField,
                             SubmitField)
 from wtforms.fields.html5 import EmailField
-from wtforms.validators import Email, EqualTo, InputRequired, Length
+from wtforms.validators import Email, EqualTo, InputRequired, Length, URL
 from wtforms.ext.sqlalchemy.fields import QuerySelectMultipleField
-
+import phonenumbers
 from ..models import User
 from .. import db
 
@@ -40,6 +41,36 @@ class RegistrationForm(Form):
                                   '<a href="{}">log in</a> instead?)'
                                   .format(url_for('account.login')))
 
+class ProfileForm(Form):
+    degrees = StringField(
+        'Degrees', validators=[InputRequired(), Length(1, 64)])
+    location = StringField(
+        'Location', validators=[InputRequired(), Length(1, 64)])
+    experience_abroad = StringField(
+        'Previous Experience Abroad', validators=[InputRequired(), Length(1, 64)])
+    email = EmailField(
+        'Email', validators=[InputRequired(), Length(1, 64), Email()])
+    phone = StringField('Phone', validators=[InputRequired(), Length(1, 15)])
+    linkedin = StringField(
+        'LinkedIn', validators=[Length(1, 64), URL()])
+    cv_link = StringField(
+        'Link to CV', validators=[Length(1, 64), URL()])
+    submit = SubmitField('Submit')
+    def validate_email(self, field):
+        user = User.query.filter_by(email=field.data).first()
+        if user.id != current_user.id:
+            raise ValidationError('Email already registered.')
+    def validate_phone(self, field):
+        if len(field.data) > 16:
+            raise ValidationError('Invalid phone number (longer than 16 characters)')
+        try:
+            number = phonenumbers.parse(field.data)
+            if not (phonenumbers.is_valid_number(number)):
+                raise ValidationError('Invalid phone number')
+        except:
+            number = phonenumbers.parse("+1"+field.data)
+            if not (phonenumbers.is_valid_number(number)):
+                raise ValidationError('Invalid phone number')
 
 class RequestResetPasswordForm(Form):
     email = EmailField(
