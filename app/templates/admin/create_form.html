@@ -19,6 +19,15 @@
     <div class="row">
       <div class="two wide column"></div>
       <div class="eleven wide column">
+<style>
+.btn-group {
+  float: left !important;
+    width: 100%;
+}
+.button-full {
+  width: 100%;
+}
+</style>
         <div id="fb-editor"></div>
         <div id="fb-editor"></div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
@@ -28,11 +37,12 @@
             window.formBuilder;
             var options = {
               formData: '{{ form|safe }}',
+              disabledActionButtons: ['data', 'clear', 'save'],
               actionButtons: [{
                 id: 'upload',
-                className: 'btn btn-success',
-                label: 'upload form',
-                type: 'button',
+                className: 'ui button-full green button',
+                label: '<i class="save icon"></i>Upload And Save Form',
+                type: 'a',
                 events: {
                   click: function() {
                     var settings = {
