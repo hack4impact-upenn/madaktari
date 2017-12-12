@@ -58,29 +58,16 @@
             </div>
             <div class="ui container">
             <br/>
-                <h1>Welcome</h1>
-                <h3>Thank you for your interest in Madaktari Africa. Please create an account or
-        log in to get started.</h3>
+                <h1>{% block page_title %}{% endblock %}</h1>
+                <h3>{% block page_description %}{% endblock %}</h3>
                 <br/>
             </div>
         </div>
     </div>
     <br/>
 
-{#        <img class="ui fluid image" src="/static/images/madaktari-banner.jpg">#}
-
         {% include 'partials/_flashes.html' %}
-        <!--<div class="page-header">-->
-          <!--<div class="header-overlay"></div>-->
-          <!--<div class="header-content">-->
-            <!--<div class="header-title">-->
-              <!--<h1>{% block title %}page title {% endblock %}</h1>-->
-            <!--</div>-->
-            <!--<div class="header-description">-->
-              <!--<p>{% block description %} page description{% endblock %}</p>-->
-            <!--</div>-->
-          <!--</div>-->
-        <!--</div>-->
+        
         {# When extended, the content block contains all the html of the webpage #}
         {% block content %}
         {% endblock %}
