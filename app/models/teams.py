@@ -13,8 +13,10 @@ class Team(db.Model):
         new_team_member = TeamMember(is_confirmed=False, is_owner=True)
         user.team_memberships.append(new_team_member)
         self.team_members.append(new_team_member)
+        print(self.team_members)
         self.is_confirmed = False
         self.team_name = team_name
+        print(self.team_members)
 
     def add_to_team(self, user):
         new_team_member = TeamMember(is_confirmed=False, is_owner=False)

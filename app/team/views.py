@@ -11,13 +11,17 @@ from .forms import ReferCandidateForm
 
 
 @team.route('/',  methods=['GET', 'POST'])
+@team.route('/<string:active>',  methods=['GET', 'POST'])
 @login_required
-def index():
+def index(active=''):
+    if active is '':
+        active = 'create'
     """ Primary Page for Teams View """
     accepted_role = Role.query.filter_by(name='Accepted').first()
     accepted_users = db.session.query(User).filter(User.role == accepted_role
                                                    and User.id != current_user.id)  # remove current user
     teams = current_user.get_teams()
+    teams = [x for x in teams if x is not None]
     referral_form = ReferCandidateForm()
     if referral_form.validate_on_submit():
         applicant_role = Role.query.filter_by(name='Applicant').first()
@@ -45,7 +49,9 @@ def index():
             invite_link=invite_link, )
         flash('Candidate {} successfully referred'.format(user.full_name()),
               'form-success')
-    return render_template('team/index.html', users=accepted_users, teams=teams, User=User, form=referral_form)
+        active='refer'
+    
+    return render_template('team/index.html', users=accepted_users, teams=teams, User=User, form=referral_form, active=active)
 
 
 @team.route('/add_to_team', methods=['GET', 'POST'])
@@ -56,15 +62,16 @@ def add_to_team():
 
     if team_id == "new_team":
         target_team = Team(current_user, new_team_name)
-        db.session.add(team)
+        db.session.add(target_team)
         db.session.commit()
     else:
         target_team = Team.query.get(team_id)
 
-    user = User.query.get(user_id)
+    user = User.query.get(int(user_id))
+    print(user)
     target_team.add_to_team(user)
 
-    return redirect(url_for('team.index'))
+    return redirect(url_for('team.index', active='team'))
 
 
 

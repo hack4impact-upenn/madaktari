@@ -15,6 +15,8 @@ from .forms import (ChangeEmailForm, ChangePasswordForm, CreatePasswordForm,
                     ResetPasswordForm, ProfileForm)
 from ..decorators import accepted_required
 
+from .overlap import (all_interval_overlap)
+
 
 @account.route('/')
 @login_required
@@ -290,9 +292,13 @@ def join_from_invite(user_id, token):
 def edit_profile():
     form = ProfileForm()
     if form.validate_on_submit():
+        prev_profiles = Profile.query.filter_by(user_id=current_user.id).all()
+        for x in prev_profiles:
+            db.session.delete(x)
         user = Profile(
             degrees=form.degrees.data,
             location=form.location.data,
+            profile_pic=form.profile_pic.data,
             experience_abroad=form.experience_abroad.data,
             contact_email=form.email.data,
             contact_phone=form.phone.data,
@@ -307,6 +313,7 @@ def edit_profile():
     if profile:
         form.degrees.data = profile.degrees
         form.location.data = profile.location
+        form.profile_pic.data = profile.profile_pic
         form.experience_abroad.data = profile.experience_abroad
         form.email.data = profile.contact_email
         form.phone.data = profile.contact_phone
@@ -314,7 +321,6 @@ def edit_profile():
         form.cv_link.data = profile.cv_link
     else:
         form.email.data = current_user.email
-    print(form)
     return render_template('account/edit_profile.html', form=form)
     
 
@@ -353,7 +359,8 @@ def see_team():
     teams = current_user.get_teams()
     print("teams: ")
     print(teams)
-    return render_template('account/team.html', teams=teams, User=User)
+    teams = [x for x in teams if x is not None]
+    return redirect(url_for('team.index', active='team'))
 
 
 @account.route('/add_to_team', methods=['GET', 'POST'])
@@ -403,7 +410,7 @@ def remove_member(team_id, user_id):
         db.session.commit()
     flash('{} was succesfully deleted'
           .format(User.query.get(user_id).last_name , 'form-success'))
-    return redirect(url_for('account.see_team'))
+    return redirect(url_for('team.index', active='team'))
 
 @account.route('/team/<int:team_id>/make-owner/<int:user_id>', methods=['GET', 'POST'])
 @login_required
@@ -421,4 +428,29 @@ def make_owner(team_id, user_id):
     flash('{} was succesfully made an owner'
           .format(User.query.get(user_id).last_name , 'form-success'))
     return redirect(url_for('account.see_team'))
+
+
+@account.route('/useroverlaps', methods=['GET', 'POST'])
+@login_required
+@csrf.exempt
+def useroverlaps():
+    users = User.query.all()
+    all_user_overlap = []
+    for user in users:
+        print(user.first_name)
+        overlap_list = all_interval_overlap(current_user.date_ranges, user.date_ranges)
+        currMax = 0
+        overlap = []
+        for date in overlap_list:
+            print(user.first_name)
+            print(date)
+            diff = date['end'] - date['start']
+            if diff.total_seconds() > currMax:
+                currMax = diff
+                overlap = date
+        all_user_overlap.append({'user' : user, 'overlap' : overlap})
+
+    return render_template('account/useroverlaps.html', ranges=all_user_overlap)
+
+
 

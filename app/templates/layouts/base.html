@@ -7,11 +7,67 @@
         {# Any templates that extend this template can set custom_head_tags to add scripts to their page #}
         {% block custom_head_tags %}{% endblock %}
     </head>
+    <style>
+
+.item > * {
+    color: white;
+}
+
+.banner-overlay {
+    background-image: url("/static/images/madaktari-banner.jpg");
+	background-repeat: no-repeat;
+	background-position: center top;
+	background-size: 100%;
+	width: 100%;
+    color: white;
+}
+
+.banner-overlay-children {
+    background: rgba(48, 48, 48, 0.8);
+}
+.item a {
+  color: #FFF;
+  font-weight: bold;
+}
+
+    </style>
     <body>
-        {% block nav %}
+{#        {% block nav %}#}
           {# add dropdown variable here to the render_nav method to render dropdowns #}
-          {{ nav.render_nav(current_user) }}
-        {% endblock %}
+{#          {{ nav.render_nav(current_user) }}#}
+{#        {% endblock %}#}
+    <div class="banner-overlay">
+        <div class="banner-overlay-children">
+            <div class="ui secondary stackable menu">
+                <div class="ui container">
+                    <div class="item">
+                      <h2><a href="/">Madaktari Africa</a></h2>
+                    </div>
+                    <div class="right menu">
+                        <div class="item">
+                          <p>Hello <strong>{{ current_user.first_name }}</strong></p>
+                        </div>
+                        <div class="item">
+                          <p><a href="{{ url_for('account.manage') }}">Settings</a></p>
+                        </div>
+                        <div class="item">
+                          <p><a href="{{ url_for('account.logout') }}">Logout</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ui container">
+            <br/>
+                <h1>Welcome</h1>
+                <h3>Thank you for your interest in Madaktari Africa. Please create an account or
+        log in to get started.</h3>
+                <br/>
+            </div>
+        </div>
+    </div>
+    <br/>
+
+{#        <img class="ui fluid image" src="/static/images/madaktari-banner.jpg">#}
 
         {% include 'partials/_flashes.html' %}
         <!--<div class="page-header">-->

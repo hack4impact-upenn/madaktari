@@ -271,7 +271,7 @@ def get_response(user_id):
 @login_required
 def view_all_teams():
     if current_user.is_admin() is False:
-        return redirect(url_for('account.see_team'))
+        return redirect(url_for('team.index', active="team"))
     teams = Team.query.all()
     return render_template('account/team.html', teams=teams)
 
