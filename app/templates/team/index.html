@@ -7,26 +7,19 @@
     <div class="ui stackable grid container">
         <div class="sixteen wide tablet twelve wide computer centered column">
 
-            <h2 class="ui header">
-                Team Formation
-                <div class="sub header">
-                    Manage your teams.
-                </div>
-            </h2>
-
-            <div class="ui top attached tabular menu">
+            <div class="ui large secondary pointing tabular menu">
               <a class="item {% if active == 'create' %} active {% endif %}" data-tab="create-team">Create Team</a>
                 <a class="item {% if active == 'team' %} active {% endif %}" data-tab="review-teams">Review Teams</a>
                 <a class="item {% if active == 'refer' %} active {% endif %}" data-tab="refer"> Refer User</a>
             </div>
 
-            <div class="ui bottom attached tab segment {% if active == 'create' %} active {% endif %}" id="create-team" data-tab="create-team">
+            <div class="ui bottom attached tab {% if active == 'create' %} active {% endif %}" id="create-team" data-tab="create-team">
                 {% include 'team/create_team.html' %}
             </div>
-            <div class="ui bottom attached tab segment {% if active == 'team' %} active {% endif %}" id="review-teams" data-tab="review-teams">
+            <div class="ui bottom attached tab {% if active == 'team' %} active {% endif %}" id="review-teams" data-tab="review-teams">
                 {% include 'team/team.html' %}
             </div>
-            <div class="ui bottom attached tab segment {% if active == 'refer' %} active {% endif %}" id="refer" data-tab="refer">
+            <div class="ui bottom attached tab {% if active == 'refer' %} active {% endif %}" id="refer" data-tab="refer">
                 {%include 'team/refer_candidate.html' %}
             </div>
         </div>

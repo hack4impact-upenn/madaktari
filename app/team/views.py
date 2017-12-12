@@ -8,6 +8,7 @@ from ..models import User, Team, Role
 from ..email import send_email
 
 from .forms import ReferCandidateForm
+from ..account.overlap import (all_interval_overlap)
 
 
 @team.route('/',  methods=['GET', 'POST'])
@@ -22,6 +23,22 @@ def index(active=''):
                                                    and User.id != current_user.id)  # remove current user
     teams = current_user.get_teams()
     teams = [x for x in teams if x is not None]
+
+    overlapping_dates = {}
+    users = User.query.all()
+    for user in users:
+        overlap_list = all_interval_overlap(current_user.date_ranges, user.date_ranges)
+        currMax = 0
+        overlap = []
+        for date in overlap_list:
+            diff = date['end'] - date['start']
+            if diff.total_seconds() > currMax:
+                currMax = diff
+                overlap = date
+        overlapping_dates[user.id] = overlap
+    print(overlapping_dates)
+
+
     referral_form = ReferCandidateForm()
     if referral_form.validate_on_submit():
         applicant_role = Role.query.filter_by(name='Applicant').first()
@@ -51,7 +68,7 @@ def index(active=''):
               'form-success')
         active='refer'
     
-    return render_template('team/index.html', users=accepted_users, teams=teams, User=User, form=referral_form, active=active)
+    return render_template('team/index.html', users=accepted_users, teams=teams, User=User, form=referral_form, active=active, overlapping_dates=overlapping_dates)
 
 
 @team.route('/add_to_team', methods=['GET', 'POST'])
@@ -68,7 +85,6 @@ def add_to_team():
         target_team = Team.query.get(team_id)
 
     user = User.query.get(int(user_id))
-    print(user)
     target_team.add_to_team(user)
 
     return redirect(url_for('team.index', active='team'))
