@@ -1,0 +1,37 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+    <div class="ui stackable grid container">
+        <div class="sixteen wide tablet twelve wide computer centered column">
+
+            <h2 class="ui header">
+                Team Formation
+                <div class="sub header">
+                    Manage your teams.
+                </div>
+            </h2>
+
+            <div class="ui top attached tabular menu">
+                <a class="item active" data-tab="create-team">Create Team</a>
+                <a class="item" data-tab="review-teams">Review Teams</a>
+                <a class="item" data-tab="refer"> Refer User</a>
+            </div>
+
+            <div class="ui bottom attached tab segment active" id="create-team" data-tab="create-team">
+                {% include 'team/create_team.html' %}
+            </div>
+            <div class="ui bottom attached tab segment" id="review-teams" data-tab="review-teams">
+                {% include 'team/review_teams.html' %}
+            </div>
+            <div class="ui bottom attached tab segment" id="refer" data-tab="refer">
+                {%include 'team/refer_candidate.html' %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $('.menu .item')
+            .tab()
+        ;
+    </script>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% block content %}
+    {% for team in teams %}
+        <div class="ui segment">
+            <h3 class="ui header">{{ team.team_name }}</h3>
+
+            <div class="ui bulleted list">
+            {% for member in team.team_members %}
+                <div class="item">{{ User.get_user_fullname(member.user_id) }}</div>
+            {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

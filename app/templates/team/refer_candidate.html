@@ -1,0 +1,36 @@
+{% import 'macros/form_macros.html' as f %}
+
+{% block content %}
+    <h2 class="ui header">
+        Refer a Madaktari Candidate
+        <div class="sub header">Refer a new volunteer</div>
+    </h2>
+
+    {% set flashes = {
+        'error':   get_flashed_messages(category_filter=['form-error']),
+        'warning': get_flashed_messages(category_filter=['form-check-email']),
+        'info':    get_flashed_messages(category_filter=['form-info']),
+        'success': get_flashed_messages(category_filter=['form-success'])
+    } %}
+
+    {{ f.begin_form(form, flashes) }}
+
+        {{ f.form_message(flashes['error'], header='Something went wrong.', class='error') }}
+        {{ f.form_message(flashes['warning'], header='Check your email.', class='warning') }}
+        {{ f.form_message(flashes['info'], header='Information', class='info') }}
+        {{ f.form_message(flashes['success'], header='Success!', class='success') }}
+
+
+        <div class="two fields">
+            {{ f.render_form_field(form.first_name) }}
+            {{ f.render_form_field(form.last_name) }}
+        </div>
+
+        {{ f.render_form_field(form.email) }}
+
+        {% for field in form | selectattr('type', 'equalto', 'SubmitField') %}
+            {{ f.render_form_field(field) }}
+        {% endfor %}
+
+    {{ f.end_form() }}
+{% endblock %}

@@ -71,4 +71,7 @@ def create_app(config_name):
     from .admin import admin as admin_blueprint
     app.register_blueprint(admin_blueprint, url_prefix='/admin')
 
+    from .team import team as team_blueprint
+    app.register_blueprint(team_blueprint, url_prefix='/team')
+
     return app
