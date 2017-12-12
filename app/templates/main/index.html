@@ -1,77 +1,19 @@
 {% extends 'layouts/base.html' %}
 {% import 'macros/form_macros.html' as f %}
 {% import 'macros/check_password.html' as check %}
+
+{% block page_title %} Welcome {% endblock %}
+{% block page_description %} Thank you for your interest in Madaktari Africa. Please create an account or
+log in to get started. {% endblock %}
+
 {% block content %}
     <div class="ui grid container">
-        <div class="eight wide computer sixteen wide mobile centered column">
-
-            {% set flashes = {
-                'error':   get_flashed_messages(category_filter=['form-error']),
-                'warning': get_flashed_messages(category_filter=['form-check-email']),
-                'info':    get_flashed_messages(category_filter=['form-info']),
-                'success': get_flashed_messages(category_filter=['form-success'])
-            } %}
-
-            <div class="ui top attached tabular menu">
-                <a class="item active" data-tab="register-tab">Sign Up</a>
-                <a class="item" data-tab="login-tab">Login</a>
+        <div class="twelve wide centered column">
+            <div class="ui large secondary pointing menu">
+                {% block menu_items %}{% endblock %}
             </div>
 
-            <div class="ui bottom attached tab segment active" data-tab="register-tab">
-                <h2 class="ui dividing header">Create an account</h2>
-
-                {{ f.begin_form(registration_form, flashes) }}
-
-                <div class="two fields">
-                    {{ f.render_form_field(registration_form.first_name) }}
-                    {{ f.render_form_field(registration_form.last_name) }}
-                </div>
-
-                {{ f.render_form_field(registration_form.email) }}
-
-                <div class="two fields">
-                    {{ f.render_form_field(registration_form.password) }}
-                    {{ f.render_form_field(registration_form.password2) }}
-                </div>
-
-                {{ f.form_message(flashes['error'], header='Something went wrong.', class='error') }}
-                {{ f.form_message(flashes['warning'], header='Check your email.', class='warning') }}
-                {{ f.form_message(flashes['info'], header='Information', class='info') }}
-                {{ f.form_message(flashes['success'], header='Success!', class='success') }}
-
-                {% for field in registration_form | selectattr('type', 'equalto', 'SubmitField') %}
-                    {{ f.render_form_field(field) }}
-                {% endfor %}
-
-                {{ f.end_form(registration_form) }}
-            </div>
-
-            <div class="ui bottom attached tab segment" data-tab="login-tab">
-                <h2 class="ui dividing header">Log in</h2>
-
-                {{ f.begin_form(login_form, flashes) }}
-                    {{ f.render_form_field(login_form.email) }}
-                    {{ f.render_form_field(login_form.password) }}
-                    <div class="ui two column grid">
-                        {{ f.render_form_field(login_form.remember_me, extra_classes='column') }}
-                        <div class="right aligned column">
-                            <a href="{{ url_for('account.reset_password_request') }}">Forgot password?</a>
-                        </div>
-                    </div>
-
-                    {{ f.form_message(flashes['error'], header='Something went wrong.', class='error') }}
-                    {{ f.form_message(flashes['warning'], header='Check your email.', class='warning') }}
-                    {{ f.form_message(flashes['info'], header='Information', class='info') }}
-                    {{ f.form_message(flashes['success'], header='Success!', class='success') }}
-
-                    {{ f.render_form_field(login_form.submit) }}
-                {{ f.end_form(login_form) }}
-            </div>
+            {% block page_content %}{% endblock %}
         </div>
     </div>
-    <script>
-        $('.menu .item')
-            .tab()
-        ;
-    </script>
 {% endblock %}

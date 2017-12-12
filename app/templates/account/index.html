@@ -13,7 +13,7 @@
                                         description='Review your application to Madaktari', icon='file text outline icon') }}
                 {% endif %}
                 {% if current_user.can(Permission.ACCEPTED) %}
-                    {{ d.dashboard_option('Review Profile', 'account.edit_dates',
+                    {{ d.dashboard_option('Review Profile', 'account.edit_profile',
                                         description='Review your volunteer profile', icon='doctor icon') }}
                 {% endif %}
                 {% if current_user.can(Permission.ACCEPTED) %}
