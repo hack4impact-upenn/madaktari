@@ -290,9 +290,13 @@ def join_from_invite(user_id, token):
 def edit_profile():
     form = ProfileForm()
     if form.validate_on_submit():
+        prev_profiles = Profile.query.filter_by(user_id=current_user.id).all()
+        for x in prev_profiles:
+            db.session.delete(x)
         user = Profile(
             degrees=form.degrees.data,
             location=form.location.data,
+            profile_pic=form.profile_pic.data,
             experience_abroad=form.experience_abroad.data,
             contact_email=form.email.data,
             contact_phone=form.phone.data,
@@ -307,6 +311,7 @@ def edit_profile():
     if profile:
         form.degrees.data = profile.degrees
         form.location.data = profile.location
+        form.profile_pic.data = profile.profile_pic
         form.experience_abroad.data = profile.experience_abroad
         form.email.data = profile.contact_email
         form.phone.data = profile.contact_phone
@@ -314,7 +319,6 @@ def edit_profile():
         form.cv_link.data = profile.cv_link
     else:
         form.email.data = current_user.email
-    print(form)
     return render_template('account/edit_profile.html', form=form)
     
 

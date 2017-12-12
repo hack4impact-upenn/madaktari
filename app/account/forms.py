@@ -3,7 +3,7 @@ from flask_login import current_user
 from flask_wtf import Form
 from wtforms import ValidationError
 from wtforms.fields import (BooleanField, PasswordField, StringField,
-                            SubmitField)
+                            SubmitField, HiddenField)
 from wtforms.fields.html5 import EmailField
 from wtforms.validators import Email, EqualTo, InputRequired, Length, URL
 from wtforms.ext.sqlalchemy.fields import QuerySelectMultipleField
@@ -55,10 +55,14 @@ class ProfileForm(Form):
         'LinkedIn', validators=[Length(1, 64), URL()])
     cv_link = StringField(
         'Link to CV', validators=[Length(1, 64), URL()])
+    profile_pic = HiddenField(
+        '')
     submit = SubmitField('Submit')
     def validate_email(self, field):
         user = User.query.filter_by(email=field.data).first()
-        if user.id != current_user.id:
+        print(field.data)
+        print(user)
+        if (user is not None) and user.id != current_user.id:
             raise ValidationError('Email already registered.')
     def validate_phone(self, field):
         if len(field.data) > 16:
