@@ -61,14 +61,14 @@ referrals = db.Table(
 
 
 daterange_associations = db.Table('daterange_association', db.Model.metadata, db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
- db.Column('start_date', db.Date, db.ForeignKey('dateranges.start_date'))
+ db.Column('start_date', db.Integer, db.ForeignKey('dateranges.id'))
 )
 
 
 class DateRange(db.Model):
     __tablename__ = "dateranges"
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    start_date = db.Column(db.Date, index=True, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    start_date = db.Column(db.Date, index=True)
     end_date = db.Column(db.Date, index=True)
 
 

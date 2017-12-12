@@ -336,7 +336,9 @@ def edit_dates():
             db.session.delete(r)
         db.session.commit()
         for r in ranges:
-            new_range = DateRange(user_id=current_user.id, start_date=parser.parse(r['start']), end_date=parser.parse(r['end']))
+            new_range = DateRange(start_date=parser.parse(r['start']), end_date=parser.parse(r['end']))
+            print(new_range.start_date)
+            db.session.add(new_range)
             current_user.date_ranges.append(new_range)
         db.session.commit()
         flash('Your selected date ranges have been saved.', 'success')
