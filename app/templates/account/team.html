@@ -2,30 +2,156 @@
 
 {% block content %}
     <div class="ui stackable grid container">
-        <div class="sixteen wide tablet twelve wide computer centered column">
-            <a class="ui basic compact button" href="{{ url_for('admin.index') }}">
-                <i class="caret left icon"></i>
-                Back to dashboard
-            </a>
+        <div class="sixteen wide tablet sixteen wide computer centered column">
             <h2 class="ui header">
                 My Teams
                 <div class="sub header">
-                    View and manage your teams
+                  View and manage {% if current_user.is_admin() == False %} your {% endif %} teams
                 </div>
             </h2>
 
             {% for team in teams %}
                 <div class="ui segment">
-                    <h3 class="ui header">{{ team.team_name }}</h3>
-
+                  <h3 class="ui header">{{ team.team_name }} {% if team.is_confirmed %}Confirmed!{% endif %}</h3>
+                    
+                    {% if current_user.is_admin() %}
+                    {% if team.is_confirmed == False  %}
+                    <a class="ui button green" href="{{ url_for('admin.toggle_confirmation', team_id=team.id) }}">Confirm this team</a>
+                    {% else %}
+                    <a class="ui button red" href="{{ url_for('admin.toggle_confirmation', team_id=team.id) }}">Unconfirm this team</a>
+                    {% endif %}
+                    <a href="{{ url_for('admin.remind_team', team_id=team.id) }}" class="ui button purple" href="">Remind team to finish tasks</a>
+                    {% endif %}
+                    {% if current_user.is_admin() %}
+                    <button class="ui button blue" id="add_todo" data-teamid="{{ team.id }}">Add a todo item to this team</button>
+                    {% endif %}
+                    {% if current_user.is_admin() == False %}
+                    <a class="ui button green" href="{{ url_for('admin.submit_team', team_id=team.id) }}">Submit team to administrator for review</a>
+                    {% endif %}
+                    <br>
+                    Todos:
+                    <div class="ui items">
+                      {% for td in team.team_todos %}
+                      <div class="item">
+                        <div>
+                          <i class="big {% if td.is_done %}checkmark green{% else %} minus square outline red {% endif %} box icon"></i>
+                        </div>
+                        <div class="content">
+                          <a class="header">{{td.description}}</a>
+                          <div class="meta">
+                            {% if td.is_done == False %}
+                            <a href="{{ url_for('admin.toggle_todo', todo_id=td.id) }}">Mark as done</a>
+                            {% else %}
+                            <a href="{{ url_for('admin.toggle_todo', todo_id=td.id) }}">Mark as incomplete</a>
+                            {% endif %}
+                            {% if current_user.is_admin() %}
+                            <a href="{{url_for('admin.delete_todo', todo_id=td.id)}}">Delete todo</a>{% endif %}
+                          </div>
+                          <div class="description">
+                            <p data-todo-id="{{td.id}}">{{td.content}}</p>
+                          </div>
+                          <div class="extra">
+                            <button class="ui button" onclick="toggleModal({{td.id}})">Add info</button>
+                          </div>
+                        </div>
+                      </div>
+                      {% endfor %}
+                    </div>
                     <div class="ui bulleted list">
                     {% for member in team.team_members %}
-                        <div class="item">{{ User.get_user_fullname(member.user_id) }}</div>
+                    <div class="item">{{ member.user.full_name() }} 
+                      <a style="color: #000" href="{{ url_for('account.remove_member', team_id=team.id, user_id=member.user_id ) }}">
+                        Remove Member
+                      </a>
+                      {% if member.is_owner == False %}
+                      <a style="color: #000" href="{{ url_for('account.make_owner', team_id=team.id, user_id=member.user_id ) }}">
+                        Make Member Owner
+                      </a>
+                      {% else %}
+                      Owner of team
+                      {% endif %}
+                    </div>
                     {% endfor %}
                     </div>
                 </div>
             {% endfor %}
 
+    <div class="ui modal" id="add_item_modal">
+        <i class="close icon"></i>
+        <div class="header">
+            Add todo task to this team
+        </div>
+        <br/>
+        <div class="ui grid">
+            <div class="two wide column"></div>
+            <div class="ten wide column">
+                <form class="ui form" id="addTodoForm" action="{{ url_for('admin.create_todo', team_id=-1) }}" methods="POST">
+                    <br/>
+                    <div class="field">
+                      <label>Description of todo item</label>
+                        <textarea name="todo_description"></textarea>
+                    </div>
+                    <br/>
+                    <input class="ui button" type="submit" value="Add Todo" >
+                    <br/>
+                </form>
+            </div>
+            <div class="two wide column"></div>
+        </div>
+    <br/>
+    </div>
+    <div class="ui modal" id="editTodoInfo">
+        <i class="close icon"></i>
+        <div class="header">
+            Add To Do information to this todo
+        </div>
+        <br/>
+        <div class="ui grid">
+            <div class="two wide column"></div>
+            <div class="ten wide column">
+              <div class="ui form">
+              <div class="field">
+                <label>Information you would like to add under todo item</label>
+                <textarea id="todoinfo"></textarea>
+              </div>
+              <br/>
+              <input class="ui button" type="submit" value="Add Todo Info" id="todoinfosubmit" >
+              </div>
+            </div>
+            <div class="two wide column"></div>
+        </div>
+    <br/>
+    </div>
+
+
+    <script type="text/javascript">
+$(document).on('click', '#add_todo', function(e) {
+  console.log('hi')
+  e.preventDefault();
+  var team = $(this).data('teamid')
+  console.log(team)
+  $('#addTodoForm').attr('action', '/admin/teams/' + team + '/create-todo');
+  $('#add_item_modal').modal('show');
+})
+
+var todoActive;
+function toggleModal(todoId) {
+  todoActive = todoId
+  $('#editTodoInfo').modal('show');
+  $('#todoinfo').val($('*[data-todo-id="'+todoId+'"]').text());
+}
+$('#todoinfosubmit').on('click', function() {
+  var content = $('#todoinfo').val()
+  $.ajax({
+         type: 'POST',
+         data: { 'data' : content },
+         url: '/admin/todos/' + todoActive + '/add-todo-description',
+         success:function(res) {
+           location.reload()
+         }
+  })
+})
+    </script>
 
         </div>
     </div>

@@ -5,7 +5,7 @@ nav {
 
 @media -sass-debug-info{filename{}line{font-family:\0000312}}
 .ui.fixed.main.menu .right.menu > .item:last-of-type {
-  border-right: 1px solid rgba(34, 36, 38, 0.09804);
+  border-right: 1px solid rgba(34, 36, 38, 0.0980392);
 }
 
 @media -sass-debug-info{filename{}line{font-family:\0000318}}
@@ -22,4 +22,36 @@ nav .mobile.only.row .ui.vertical.menu {
 @media -sass-debug-info{filename{}line{font-family:\0000330}}
 table.selectable tr:hover {
   cursor: pointer !important;
+}
+
+@media -sass-debug-info{filename{}line{font-family:\0000334}}
+.page-header {
+  min-height: 50vh;
+  background: url(/static/images/madaktari.png) no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  position: relative;
+}
+
+@media -sass-debug-info{filename{}line{font-family:\0000344}}
+.header-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 0;
+}
+
+@media -sass-debug-info{filename{}line{font-family:\0000354}}
+.header-content {
+  color: white;
+  z-index: 1;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
 }

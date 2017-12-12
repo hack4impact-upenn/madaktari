@@ -9,7 +9,7 @@ from . import admin
 from .. import db, csrf
 from ..decorators import admin_required
 from ..email import send_email
-from ..models import Role, User, EditableHTML, Form, FormResponse
+from ..models import Role, User, EditableHTML, Form, FormResponse, Team, TeamTodo
 import json
 import jsonpickle
 
@@ -266,3 +266,104 @@ def get_response(user_id):
         flash('User status {} successfully changed to {}.'
               .format(user.full_name(), user.role.name), 'form-success')
     return render_template('admin/form_response.html', form_resp_obj=form_resp_obj, user=user, form=form)
+
+@admin.route('/teams/view-all', methods=['GET', 'POST'])
+@login_required
+def view_all_teams():
+    if current_user.is_admin() is False:
+        return redirect(url_for('team.index', active="team"))
+    teams = Team.query.all()
+    return render_template('account/team.html', teams=teams)
+
+@admin.route('/teams/<int:team_id>/toggle-confirmation', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def toggle_confirmation(team_id):
+    team = Team.query.get(team_id)
+    team.is_confirmed = not team.is_confirmed
+    db.session.add(team)
+    db.session.commit()
+    flash('Successfully {} team {}'.format(('confirmed' if team.is_confirmed is True else 'unconfirmed'), team.team_name), 'success')
+    return redirect(url_for('admin.view_all_teams'))
+
+@admin.route('/teams/<int:team_id>/create-todo', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def create_todo(team_id):
+    description = request.args.get('todo_description')
+    t = Team.query.get(team_id)
+    td = TeamTodo(is_done=False, team_id=t.id, description=description)
+    db.session.add(td)
+    db.session.commit()
+    flash('Successfully added Todo', 'success')
+    return redirect(url_for('admin.view_all_teams'))
+
+@admin.route('/todos/<int:todo_id>/add-todo-description', methods=['GET', 'POST'])
+@csrf.exempt
+def add_todo_description(todo_id):
+    if request.method == "POST":
+        td = TeamTodo.query.get(todo_id)
+        td.content = (request.form['data'])
+        db.session.add(td)
+        db.session.commit()
+    return 'OK'
+
+
+@admin.route('/todos/<int:todo_id>/toggle-todo')
+@login_required
+def toggle_todo(todo_id):
+    todo = TeamTodo.query.get(todo_id)
+    todo.is_done = not todo.is_done
+    db.session.add(todo)
+    db.session.commit()
+    flash('Successfully changed todo to {}'.format('done' if todo.is_done is True else 'not done'), 'success')
+    return redirect(url_for('admin.view_all_teams'))
+
+
+
+@admin.route('/todos/<int:todo_id>/remove-todo')
+@login_required
+@admin_required
+def delete_todo(todo_id):
+    todo = TeamTodo.query.get(todo_id)
+    db.session.delete(todo)
+    db.session.commit()
+    flash('Successfully deleted todo', 'success')
+    return redirect(url_for('admin.view_all_teams'))
+
+@admin.route('/todos/<int:team_id>/remind', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def remind_team(team_id):
+    team = Team.query.get(team_id)
+    tasks = [x.description for x in team.team_todos if x.is_done is False]
+    print(tasks)
+    for m in team.team_members:
+        email = m.user.email
+        get_queue().enqueue(
+                send_email,
+                recipient=email,
+                subject='You have remaining todo items for your madaktari team!',
+                template='admin/email/remind_email',
+                team=team,
+                tasks=tasks)
+
+    flash('Reminding all team members!', 'success')
+    return redirect(url_for('admin.view_all_teams'))
+
+@admin.route('/team/<int:team_id>/submit', methods=['GET', 'POST'])
+@login_required
+def submit_team(team_id): 
+    team = Team.query.get(team_id)
+    admins = Role.query.filter_by(name='Administrator')[0].users.all()
+    if admins is not None:
+        for a in admins:
+            email = a.email
+            get_queue().enqueue(
+                    send_email,
+                    recipient=email,
+                    subject='A team is ready to be confirmed',
+                    template='admin/email/submitted_email',
+                    team=team)
+    flash('Successfully notified administrators', 'success')
+    return redirect(url_for('admin.view_all_teams'))

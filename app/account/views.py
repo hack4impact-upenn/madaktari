@@ -9,7 +9,7 @@ import logging
 from . import account
 from .. import db, csrf
 from ..email import send_email
-from ..models import User, Team, DateRange, Permission, Profile
+from ..models import User, Team, DateRange, Permission, Profile, TeamMember
 from .forms import (ChangeEmailForm, ChangePasswordForm, CreatePasswordForm,
                     LoginForm, RegistrationForm, RequestResetPasswordForm,
                     ResetPasswordForm, ProfileForm)
@@ -359,7 +359,8 @@ def see_team():
     teams = current_user.get_teams()
     print("teams: ")
     print(teams)
-    return render_template('account/team.html', teams=teams, User=User)
+    teams = [x for x in teams if x is not None]
+    return redirect(url_for('team.index', active='team'))
 
 
 @account.route('/add_to_team', methods=['GET', 'POST'])
@@ -376,8 +377,56 @@ def add_to_team():
         team = Team.query.get(team_id)
 
     user = User.query.get(user_id)
-    team.add_to_team(user)
+    str = 'The person is already  a member of {}!'.format(team.team_name)
+    if int(user_id) not in [int(x.user_id) for x in team.team_members]:
+        team.add_to_team(user)
+        db.session.add(team)
+        db.session.commit()
+        str = 'This person was successfully added to team {}'.format(team.team_name)
+    flash(str, 'info')
+    return redirect(url_for('account.see_team'))
 
+
+@account.route('/team/<int:team_id>')
+@account.route('/team/<int:team_id>/info')
+@login_required
+def team_info(team_id):
+    """View a team's profile."""
+    team = Team.query.filter_by(id=team_id).first()
+    if team is None:
+        pass
+    return render_template('admin/manage_team.html', team=team)
+
+
+@account.route('/team/<int:team_id>/remove-member/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def remove_member(team_id, user_id):
+    """Change a team's email."""
+    team = Team.query.filter_by(id=team_id).first()
+    l = [x for x in team.team_members if x.user_id == user_id]
+    if len(l) > 0:
+        tm = TeamMember.query.get(l[0].id)
+        db.session.delete(tm)
+        db.session.commit()
+    flash('{} was succesfully deleted'
+          .format(User.query.get(user_id).last_name , 'form-success'))
+    return redirect(url_for('team.index', active='team'))
+
+@account.route('/team/<int:team_id>/make-owner/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def make_owner(team_id, user_id):
+    """Change a team's email."""
+    team = Team.query.filter_by(id=team_id).first()
+    l = team.team_members
+    for t in l:
+        if t.user_id == user_id:
+            t.is_owner = True
+        else:
+            t.is_owner = False
+        db.session.add(t)
+        db.session.commit()
+    flash('{} was succesfully made an owner'
+          .format(User.query.get(user_id).last_name , 'form-success'))
     return redirect(url_for('account.see_team'))
 
 

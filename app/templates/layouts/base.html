@@ -25,6 +25,10 @@
 .banner-overlay-children {
     background: rgba(48, 48, 48, 0.8);
 }
+.item a {
+  color: #FFF;
+  font-weight: bold;
+}
 
     </style>
     <body>
@@ -37,17 +41,17 @@
             <div class="ui secondary stackable menu">
                 <div class="ui container">
                     <div class="item">
-                        <h2>Madaktari Africa</h2>
+                      <h2><a href="/">Madaktari Africa</a></h2>
                     </div>
                     <div class="right menu">
                         <div class="item">
-                            <p>Hello <strong>Santiago</strong></p>
+                          <p>Hello <strong>{{ current_user.first_name }}</strong></p>
                         </div>
                         <div class="item">
-                            <p>Settings</p>
+                          <p><a href="{{ url_for('account.manage') }}">Settings</a></p>
                         </div>
                         <div class="item">
-                            <p>Logout</p>
+                          <p><a href="{{ url_for('account.logout') }}">Logout</a></p>
                         </div>
                     </div>
                 </div>
@@ -66,6 +70,17 @@
 {#        <img class="ui fluid image" src="/static/images/madaktari-banner.jpg">#}
 
         {% include 'partials/_flashes.html' %}
+        <!--<div class="page-header">-->
+          <!--<div class="header-overlay"></div>-->
+          <!--<div class="header-content">-->
+            <!--<div class="header-title">-->
+              <!--<h1>{% block title %}page title {% endblock %}</h1>-->
+            <!--</div>-->
+            <!--<div class="header-description">-->
+              <!--<p>{% block description %} page description{% endblock %}</p>-->
+            <!--</div>-->
+          <!--</div>-->
+        <!--</div>-->
         {# When extended, the content block contains all the html of the webpage #}
         {% block content %}
         {% endblock %}

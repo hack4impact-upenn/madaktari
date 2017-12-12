@@ -1,41 +1,55 @@
+
 {% block content %}
-    <div class="ui menu">
-        <div class="ui right search item">
-            <div class="ui transparent icon input">
-                <input id="search-users" type="text" placeholder="Search users…">
-                <i class="search icon"></i>
+    <div class="ui stackable grid container">
+        <div class="sixteen wide tablet sixteen wide computer centered column">
+            <h2 class="ui header">
+                Accepted Users
+                <div class="sub header">
+                    View and manage currently registered users.
+                </div>
+            </h2>
+
+            <div class="ui menu">
+                <div class="ui right search item">
+                    <div class="ui transparent icon input">
+                        <input id="search-users" type="text" placeholder="Search users…">
+                        <i class="search icon"></i>
+                    </div>
+                </div>
+            </div>
+
+            {# Use overflow-x: scroll so that mobile views don't freak out
+             # when the table is too wide #}
+            <div style="overflow-x: scroll;">
+                <table class="ui searchable sortable unstackable selectable celled table">
+                    <thead>
+                        <tr>
+                            <th>First name</th>
+                            <th class="sorted ascending">Last name</th>
+                            <th>Email address</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for u in users | sort(attribute='last_name') %}
+                    {% if u.id != current_user.id %}
+                        <tr>
+                            <td>{{ u.first_name }}</td>
+                            <td>{{ u.last_name }}</td>
+                            <td><a href="mailto:{{u.email}}">{{ u.email }}</td>
+                            <td>
+                                <button class="ui button" onclick="enable_modal('{{ u.full_name() }}', {{ u.id }})">Add to Team</button>
+                            </td>
+                        </tr>
+                    {% endif %}
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    {# Use overflow-x: scroll so that mobile views don't freak out
-     # when the table is too wide #}
-    <div style="overflow-x: scroll;">
-        <table class="ui searchable sortable unstackable selectable celled table">
-            <thead>
-                <tr>
-                    <th>First name</th>
-                    <th class="sorted ascending">Last name</th>
-                    <th>Email address</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for u in users | sort(attribute='last_name') %}
-                <tr>
-                    <td>{{ u.first_name }}</td>
-                    <td>{{ u.last_name }}</td>
-                    <td><a href="mailto:{{u.email}}">{{ u.email }}</td>
-                    <td>
-                        <button class="ui button" onclick="enable_modal('{{ u.full_name() }}', {{ u.id }})">Add to Team</button>
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <div class="ui modal">
+    <div class="ui modal" id="addteam">
         <i class="close icon"></i>
         <div class="header">
             Add Volunteer to Team
@@ -76,6 +90,7 @@
     <br/>
     </div>
 
+
     <script type="text/javascript">
 
         // Searching in list of users
@@ -112,10 +127,9 @@
         }
 
         function enable_modal(user_fullname, user_id) {
-            $('.ui.modal').modal('show');
+            $('#addteam').modal('show');
             $('#user_to_add').text(user_fullname);
             $('#user_id_input').attr("value", user_id);
         }
     </script>
-
 {% endblock %}

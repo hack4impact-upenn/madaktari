@@ -1,0 +1,7 @@
+Hello Madaktari Administrator,
+
+Team {{ team.team_name }} has submitted a request for you to review their confirmed team.
+
+From,
+
+The Madaktari Team

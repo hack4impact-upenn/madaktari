@@ -2,6 +2,9 @@ from flask import flash, render_template, request, jsonify, abort, url_for, redi
 from flask_rq import get_queue
 from flask_login import current_user, login_user
 
+import os, time, json
+import boto3
+
 import jsonpickle
 import os
 import boto3
@@ -13,27 +16,28 @@ from ..email import send_email
 from . import main
 from .forms import LoginForm, RegistrationForm
 
-
 @main.route('/', methods=['GET', 'POST'])
 def index():
-
-    # redirect if already logged in
-    # TODO: redirect to proper stage
     if current_user.is_authenticated:
         if current_user.is_role('Applicant'):
-            return redirect(url_for('account.index'))
+            print('hi')
+            return redirect(url_for('main.form'))
 
         elif current_user.is_role('Pending'):
-            return redirect(url_for('account.index'))
+            print('h2i')
+            return redirect(url_for('main.form'))
 
         elif current_user.is_role('Accepted'):
+            print('h3i')
             return redirect(url_for('account.index'))
 
         elif current_user.is_role('Rejected'):
+            print('h4i')
             return redirect(url_for('account.index'))
 
         elif current_user.is_role('Administrator'):
-            return redirect(url_for('account.index'))
+            print('h5i')
+            return redirect(url_for('admin.index'))
 
     # Log in an existing user.
     login_form = LoginForm()
@@ -122,7 +126,9 @@ def edit_form():
 @main.route('/submit-form', methods=['POST'])
 @csrf.exempt
 def submit_form():
+    print(request.json)
     content = jsonpickle.encode(request.json)
+    print(content)
     current_form = Form.query.order_by('id desc').first()
     form = FormResponse(user_id=current_user.id, content=content,
                         form_id=current_form.id)
@@ -141,7 +147,6 @@ def about():
     editable_html_obj = EditableHTML.get_editable_html('about')
     return render_template('main/about.html',
                            editable_html_obj=editable_html_obj)
-
 
 @main.route('/sign-s3/')
 def sign_s3():

@@ -1,0 +1,12 @@
+Hi {{ team.team_name }},
+
+You still have some reamining items to do to complete your team application. Please log on to your portal and complete the following items.
+
+{% for t in tasks %}
+ - {{ t }}
+{% endfor %}
+
+
+From,
+
+Madktari Africa
