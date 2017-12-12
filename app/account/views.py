@@ -15,6 +15,8 @@ from .forms import (ChangeEmailForm, ChangePasswordForm, CreatePasswordForm,
                     ResetPasswordForm, ProfileForm)
 from ..decorators import accepted_required
 
+from .overlap import (all_interval_overlap)
+
 
 @account.route('/')
 @login_required
@@ -377,4 +379,29 @@ def add_to_team():
     team.add_to_team(user)
 
     return redirect(url_for('account.see_team'))
+
+
+@account.route('/useroverlaps', methods=['GET', 'POST'])
+@login_required
+@csrf.exempt
+def useroverlaps():
+    users = User.query.all()
+    all_user_overlap = []
+    for user in users:
+        print(user.first_name)
+        overlap_list = all_interval_overlap(current_user.date_ranges, user.date_ranges)
+        currMax = 0
+        overlap = []
+        for date in overlap_list:
+            print(user.first_name)
+            print(date)
+            diff = date['end'] - date['start']
+            if diff.total_seconds() > currMax:
+                currMax = diff
+                overlap = date
+        all_user_overlap.append({'user' : user, 'overlap' : overlap})
+
+    return render_template('account/useroverlaps.html', ranges=all_user_overlap)
+
+
 
