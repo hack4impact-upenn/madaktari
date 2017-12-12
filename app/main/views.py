@@ -16,6 +16,7 @@ from ..email import send_email
 from . import main
 from .forms import LoginForm, RegistrationForm
 
+
 @main.route('/', methods=['GET', 'POST'])
 def index():
     if current_user.is_authenticated:
@@ -39,26 +40,19 @@ def index():
             print('h5i')
             return redirect(url_for('admin.index'))
 
-    # Log in an existing user.
-    login_form = LoginForm()
-    if login_form.validate_on_submit():
-        user = User.query.filter_by(email=login_form.email.data).first()
-        if user is not None and user.password_hash is not None and \
-                user.verify_password(login_form.password.data):
-            login_user(user, login_form.remember_me.data)
-            flash('You are now logged in. Welcome back!', 'success')
-            return redirect(request.args.get('next') or url_for('main.index'))
-        else:
-            flash('Invalid email or password.', 'form-error')
+    return redirect(url_for('main.register'))
 
-    # Register a new user, and send them a confirmation email.
-    registration_form = RegistrationForm()
-    if registration_form.validate_on_submit():
+
+@main.route('/register', methods=['GET', 'POST'])
+def register():
+    """Register a new user, and send them a confirmation email."""
+    form = RegistrationForm()
+    if form.validate_on_submit():
         user = User(
-            first_name=registration_form.first_name.data,
-            last_name=registration_form.last_name.data,
-            email=registration_form.email.data,
-            password=registration_form.password.data)
+            first_name=form.first_name.data,
+            last_name=form.last_name.data,
+            email=form.email.data,
+            password=form.password.data)
         db.session.add(user)
         db.session.commit()
         token = user.generate_confirmation_token()
@@ -73,14 +67,23 @@ def index():
         flash('A confirmation link has been sent to {}.'.format(user.email),
               'warning')
         return redirect(url_for('main.index'))
-
-    return render_template('main/index.html',
-                           registration_form=registration_form, login_form=login_form)
+    return render_template('main/register.html', form=form)
 
 
-@main.route('/playground')
-def playground():
-    return render_template('main/playground.html')
+@main.route('/login', methods=['GET', 'POST'])
+def login():
+    """Log in an existing user."""
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user is not None and user.password_hash is not None and \
+                user.verify_password(form.password.data):
+            login_user(user, form.remember_me.data)
+            flash('You are now logged in. Welcome back!', 'success')
+            return redirect(request.args.get('next') or url_for('main.index'))
+        else:
+            flash('Invalid email or password.', 'form-error')
+    return render_template('main/login.html', form=form)
 
 
 @main.route('/form')

@@ -3,9 +3,8 @@
     <div class="ui stackable grid container">
         <div class="sixteen wide tablet sixteen wide computer centered column">
             <h2 class="ui header">
-                Accepted Users
                 <div class="sub header">
-                    View and manage currently registered users.
+                    View volunteers who are also accepted
                 </div>
             </h2>
 
@@ -27,6 +26,7 @@
                             <th>First name</th>
                             <th class="sorted ascending">Last name</th>
                             <th>Email address</th>
+                            <th>Overlapping Dates</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -34,9 +34,19 @@
                     {% for u in users | sort(attribute='last_name') %}
                     {% if u.id != current_user.id %}
                         <tr>
-                            <td>{{ u.first_name }}</td>
+                            <td>
+                              
+                              <img id="profileImg" class="ui avatar image" src="
+                              {% if u.profile_pic != None %} 
+                              {{ u.profile_pic }} 
+                              {% else %} 
+                              {{ url_for('static', filename="images/default_prof.png") }}
+                              {% endif %}
+                              "/>
+                              {{ u.first_name }}</td>
                             <td>{{ u.last_name }}</td>
                             <td><a href="mailto:{{u.email}}">{{ u.email }}</td>
+                            <td>{% if overlapping_dates[u.id] != [] %}{{ overlapping_dates[u.id] }}{% endif %}</td>
                             <td>
                                 <button class="ui button" onclick="enable_modal('{{ u.full_name() }}', {{ u.id }})">Add to Team</button>
                             </td>

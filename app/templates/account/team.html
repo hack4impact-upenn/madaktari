@@ -147,7 +147,7 @@ $('#todoinfosubmit').on('click', function() {
          data: { 'data' : content },
          url: '/admin/todos/' + todoActive + '/add-todo-description',
          success:function(res) {
-           location.reload()
+           window.location = "{{ url_for('team.index', active='team') }}";
          }
   })
 })
