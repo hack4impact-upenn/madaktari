@@ -46,7 +46,7 @@
                               {{ u.first_name }}</td>
                             <td>{{ u.last_name }}</td>
                             <td><a href="mailto:{{u.email}}">{{ u.email }}</td>
-                            <td>{% if overlapping_dates[u.id] != [] %}{{ overlapping_dates[u.id] }}{% endif %}</td>
+                            <td>{% if overlapping_dates[u.id] != [] %}{{ overlapping_dates[u.id]['start'] }} - {{ ovrlapping_dates[u.id]['end'] }}{% endif %}</td>
                             <td>
                                 <button class="ui button" onclick="enable_modal('{{ u.full_name() }}', {{ u.id }})">Add to Team</button>
                             </td>
