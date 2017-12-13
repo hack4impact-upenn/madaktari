@@ -38,7 +38,7 @@
                               
                               <img id="profileImg" class="ui avatar image" src="
                               {% if u.profile_pic != None %} 
-                              {{ u.profile.profile_pic }} 
+                              {{ u.profile.first().profile_pic }} 
                               {% else %} 
                               {{ url_for('static', filename="images/default_prof.png") }}
                               {% endif %}
