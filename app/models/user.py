@@ -75,7 +75,7 @@ class DateRange(db.Model):
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    confirmed = db.Column(db.Boolean, default=False)
+    confirmed = db.Column(db.Boolean, default=True)
     first_name = db.Column(db.String(64), index=True)
     last_name = db.Column(db.String(64), index=True)
     email = db.Column(db.String(64), unique=True, index=True)

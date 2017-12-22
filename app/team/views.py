@@ -33,7 +33,7 @@ def index(active=''):
         for date in overlap_list:
             diff = date['end'] - date['start']
             if diff.total_seconds() > currMax:
-                currMax = diff
+                currMax = diff.total_seconds()
                 overlap = date
         overlapping_dates[user.id] = overlap
     print(overlapping_dates)
