@@ -322,7 +322,13 @@ def edit_profile():
     else:
         form.email.data = current_user.email
     return render_template('account/edit_profile.html', form=form)
-    
+
+@account.route('/view-profile/<int:id>', methods=['GET'])
+@login_required
+def view_profile(id):
+    user = User.query.get(id)
+    profile_obj = User.query.get(id).profile.first()
+    return render_template('account/view_profile.html',user=user,  profile_obj=profile_obj)
 
 @account.route('/edit_dates', methods=['GET', 'POST'])
 @login_required

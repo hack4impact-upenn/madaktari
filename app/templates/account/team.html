@@ -24,6 +24,7 @@
                     {% endif %}
                     {% if current_user.is_admin() %}
                     <button class="ui button blue" id="add_todo" data-teamid="{{ team.id }}">Add a todo item to this team</button>
+                    <br><h3>Public Link For Hospital Administrators: {{ url_for('admin.view_single_team', id=team.id, _external=True) }}</h3>
                     {% endif %}
                     {% if current_user.is_admin() == False %}
                     <a class="ui button green" href="{{ url_for('admin.submit_team', team_id=team.id) }}">Submit team to administrator for review</a>

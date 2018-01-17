@@ -33,7 +33,7 @@
                     <tbody>
                     {% for u in users | sort(attribute='last_name') %}
                     {% if u.id != current_user.id %}
-                        <tr>
+                    <tr >
                             <td>
                               
                               <img id="profileImg" class="ui avatar image" src="
@@ -48,7 +48,8 @@
                             <td><a href="mailto:{{u.email}}">{{ u.email }}</td>
                             <td>{% if overlapping_dates[u.id] != [] %}{{ overlapping_dates[u.id]['start'] }} to {{ overlapping_dates[u.id]['end'] }}{% endif %}</td>
                             <td>
-                                <button class="ui button" onclick="enable_modal('{{ u.full_name() }}', {{ u.id }})">Add to Team</button>
+                              <button class="ui button" onclick="enable_modal('{{ u.full_name() }}', {{ u.id }})">Add to Team</button> &nbsp; <br>
+                                <button class="ui button" onclick="window.location.href = '{{ url_for('account.view_profile', id=u.id) }}'">View Profile</button>
                             </td>
                         </tr>
                     {% endif %}

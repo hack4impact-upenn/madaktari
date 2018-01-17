@@ -9,7 +9,7 @@ from . import admin
 from .. import db, csrf
 from ..decorators import admin_required
 from ..email import send_email
-from ..models import Role, User, EditableHTML, Form, FormResponse, Team, TeamTodo
+from ..models import Role, User, EditableHTML, Form, FormResponse, Team, TeamTodo, FeedbackFormResponse, FeedbackForm
 import json
 import jsonpickle
 
@@ -214,6 +214,7 @@ def update_form():
     return jsonify({'status': 200})
 
 
+
 @admin.route('/view-responses', methods=['GET'])
 @login_required
 @admin_required
@@ -221,23 +222,105 @@ def get_responses():
     responses = FormResponse.query.all()
     r_set = []
     for r in responses:
-        if r.user.is_role('Pending'):
-            is_in = False
-            for rs in r_set:
-                if r.user_id == rs.user_id:
-                    is_in = True
-                    break
-            if is_in is False:
-                print(r_set)
-                r_set.append(r)
+            if r.user.is_role('Pending'):
+                is_in = False
+                for rs in r_set:
+                    if r.user_id == rs.user_id:
+                        is_in = True
+                        break
+                if is_in is False:
+                    print(r_set)
+                    r_set.append(r)
     return render_template('admin/view_responses.html', responses=r_set)
+
 
 
 @admin.route('/view-response/<int:user_id>', methods=['GET','POST'])
 @login_required
 @admin_required
 def get_response(user_id):
-    r = FormResponse.query.filter_by(user_id=user_id).order_by('id desc').first()
+    r = FormResponse.query.filter_by(user_id=user_id).order_by('id desc').all()
+    user = User.query.filter_by(id=user_id).first()
+    if user is None:
+        abort(404)
+    form_resp_obj = []
+    raw_form_content = ''
+    if r.form:
+        raw_form_content = r.form.content
+    raw_form_resp = r.content
+    if raw_form_content and raw_form_resp:
+        form_content = jsonpickle.decode(raw_form_content)
+        form_resp = jsonpickle.decode(raw_form_resp)
+        for k in form_resp:
+            k_new = k.replace('[]', '')
+            for idx, x in enumerate(form_content):
+                try:
+                    if x['name'] == k_new:
+                        form_resp_obj.append({'idx': idx, 'label': x['label'], 'resp': form_resp[k]})
+                except:
+                    pass
+        form_resp_obj = sorted(form_resp_obj, key=lambda k: k['idx'])
+    form = ChangeAccountTypeForm()
+    if form.validate_on_submit():
+        user.role = form.role.data
+        db.session.add(user)
+        db.session.commit()
+        flash('User status {} successfully changed to {}.'
+              .format(user.full_name(), user.role.name), 'form-success')
+    return render_template('admin/form_response.html', form_resp_obj=form_resp_obj, user=user, form=form)
+
+@admin.route('/feedback/create-form', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def feedback_create_form_index():
+    form = {}
+    try:
+        f = FeedbackForm.get_form_content()
+        if f is not None:
+            print(f)
+            form = json.dumps(jsonpickle.decode(f))
+            form = form.replace("'", '')
+    except Exception as e:
+        print(e)
+        form = {}
+    return render_template('admin/feedback_form.html', form=form)
+
+
+@admin.route('/feedback/update-form', methods=['POST'])
+@csrf.exempt
+def feedback_update_form():
+    content = jsonpickle.encode(json.loads(request.json))
+    form = FeedbackForm(content=content)
+    db.session.add(form)
+    db.session.commit()
+    return jsonify({'status': 200})
+
+
+
+@admin.route('/feedback/view-responses', methods=['GET'])
+@login_required
+@admin_required
+def feedback_get_responses():
+    responses = FeedbackFormResponse.query.all()
+    r_set = []
+    for r in responses:
+        is_in = False
+        for rs in r_set:
+            if r.user_id == rs.user_id:
+                is_in = True
+                break
+        if is_in is False:
+            print(r_set)
+            r_set.append(r)
+    return render_template('admin/view_responses.html', responses=r_set)
+
+
+
+@admin.route('/feedback/view-response/<int:user_id>', methods=['GET','POST'])
+@login_required
+@admin_required
+def feedback_get_response(user_id):
+    r = FeedbackFormResponse.query.filter_by(user_id=user_id).order_by('id desc').all()
     user = User.query.filter_by(id=user_id).first()
     if user is None:
         abort(404)
@@ -273,6 +356,11 @@ def view_all_teams():
     if current_user.is_admin() is False:
         return redirect(url_for('team.index', active="team"))
     teams = Team.query.all()
+    return render_template('account/team.html', teams=teams)
+
+@admin.route('/teams/view/<int:id>', methods=['GET', 'POST'])
+def view_single_team(id):
+    teams = [Team.query.get(id)]
     return render_template('account/team.html', teams=teams)
 
 @admin.route('/teams/<int:team_id>/toggle-confirmation', methods=['GET', 'POST'])
@@ -363,6 +451,25 @@ def submit_team(team_id):
                     send_email,
                     recipient=email,
                     subject='A team is ready to be confirmed',
+                    template='admin/email/submitted_email',
+                    team=team)
+    flash('Successfully notified administrators', 'success')
+    return redirect(url_for('admin.view_all_teams'))
+
+
+@admin.route('/team/<int:team_id>/done/<int:type>', methods=['GET', 'POST'])
+@login_required
+def done_team(team_id, type): 
+    team = Team.query.get(team_id)
+    team.is_done = False if type == 0 else True
+    admins = Role.query.filter_by(name='Administrator')[0].users.all()
+    if admins is not None:
+        for a in admins:
+            email = a.email
+            get_queue().enqueue(
+                    send_email,
+                    recipient=email,
+                    subject='A team is finished with their team',
                     template='admin/email/submitted_email',
                     team=team)
     flash('Successfully notified administrators', 'success')
