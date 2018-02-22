@@ -7,24 +7,34 @@
             <h2 class="ui header">
                 Admin Dashboard
             </h2>
-            <div class="ui two column stackable grid">
+              <h3>View/Edit and decide on volunteer applications</h3><br>
+              <div class="ui two column stackable grid">
+                {{ d.dashboard_option('Edit Application Form', 'admin.create_form_index',
+                                    description='Create/Edit the application form for the volunteers', icon='file text outline icon') }}
+                {{ d.dashboard_option('View Applicant Responses', 'admin.get_responses',
+                                    description='View responses from the volunteers', icon='file text outline icon') }}
+              </div>
+                                    <h3>View all current users on the system and their status</h3><br>
+              <div class="ui two column stackable grid">
                 {{ d.dashboard_option('Registered Users', 'admin.registered_users',
                                     description='View and manage user accounts', icon='users icon') }}
                 {{ d.dashboard_option('Add New User', 'admin.new_user',
                                     description='Create a new user account', icon='add user icon') }}
                 {{ d.dashboard_option('Invite New User', 'admin.invite_user',
                                     description='Invites a new user to create their own account', icon='add user icon') }}
-                {{ d.dashboard_option('Edit Application Form', 'admin.create_form_index',
-                                    description='Create/Edit the application form for the volunteers', icon='file text outline icon') }}
-                {{ d.dashboard_option('View Applicant Responses', 'admin.get_responses',
-                                    description='View responses from the volunteers', icon='file text outline icon') }}
+              </div>
+                                    <h3>View and Manage all teams</h3><br>
+              <div class="ui two column stackable grid">
                 {{ d.dashboard_option('View All Teams', 'admin.view_all_teams',
                                     description='View all current teams', icon='file text outline icon') }}
+              </div>
+                                    <h3>View/Edit feedback form and view responses</h3><br>
+              <div class="ui two column stackable grid">
                 {{ d.dashboard_option('Edit Feedback Form', 'admin.feedback_create_form_index',
                                     description='Create/Edit the feedback form for the volunteers', icon='file text outline icon') }}
                 {{ d.dashboard_option('View Feedback Responses', 'admin.feedback_get_responses',
                                     description='View feedback responses from the volunteers', icon='file text outline icon') }}
-            </div>
+              </div>
         </div>
     </div>
 {% endblock %}
