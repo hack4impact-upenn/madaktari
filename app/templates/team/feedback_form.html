@@ -1,7 +1,7 @@
 {% extends 'layouts/base.html' %}
 
 {% block title %}
-Main page
+Feedback Form
 {% endblock %}
 
 {% block description %}
@@ -10,21 +10,14 @@ This is going to be the main page
 
 {% block content %}
     <div class="ui text container">
-      <h1>Hello and welcome to Madaktari's Volunteer Platform.</h1>
       {% if current_user.is_authenticated %} 
-        {% if current_user.is_role("rejected") %}
-        <p>At this time, we are unable to approve your application. Please visit the main madaktari.org website and attempt to 
-        contact an administrator/manager. Thank you for your interest. </p>
-        {% elif current_user.is_role("pending") %}
-        <p>We are currently reviewing your application, please click on the madaktari logo in the top left to return home</p>
-        {% elif current_user.is_role("accepted") %}
-        <p>Hello,<br> Thank you for applying to Madaktari Africa. Congratulations! You have now been accepted as a volunteer for us. 
-        Return home and start with your team formation!</p>
-        {% elif current_user.is_role("applicant") and content is not none %}
-          <div id="fb-render"></div>
-          <form id="submitForm">
-            <input type='submit' class='btn btn-success' value='Submit Form'/>
-          </form>
+      <h1>Feedback Form</h1>
+      <p>When you are done, <a href="{{ url_for('account.index') }}">return home</a></p>
+      {% if content is not none %}
+        <div id="fb-render"></div>
+        <form id="submitForm">
+          <input type='submit' class='btn btn-success' value='Submit Form'/>
+        </form>
 <div class="ui basic modal">
   <div class="ui icon header">
     <i class="upload icon"></i>
@@ -78,7 +71,7 @@ This is going to be the main page
               var settings = {
                   "async": true,
                   "crossDomain": true,
-                  "url": "/submit-form",
+                  "url": "/team/submit-form",
                   "method": "POST",
                   "headers": {
                     "content-type": "application/json",
