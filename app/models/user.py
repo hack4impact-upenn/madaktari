@@ -55,8 +55,8 @@ class Role(db.Model):
 
 referrals = db.Table(
     'referrals',
-    db.Column('referrer_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
-    db.Column('candidate_id', db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    db.Column('referrer_id', db.Integer, db.ForeignKey('users.id')),
+    db.Column('candidate_id', db.Integer, db.ForeignKey('users.id'))
 )
 
 

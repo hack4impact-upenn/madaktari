@@ -42,29 +42,30 @@ def index(active=''):
     referral_form = ReferCandidateForm()
     if referral_form.validate_on_submit():
         applicant_role = Role.query.filter_by(name='Applicant').first()
-        user = User(
-            role=applicant_role,
-            first_name=referral_form.first_name.data,
-            last_name=referral_form.last_name.data,
-            email=referral_form.email.data)
-        current_user.candidates.append(user)
-        user.referrers.append(current_user)
-        db.session.add(user)
-        db.session.commit()
-        token = user.generate_confirmation_token()
-        invite_link = url_for(
-            'account.join_from_invite',
-            user_id=user.id,
-            token=token,
-            _external=True)
-        get_queue().enqueue(
-            send_email,
-            recipient=user.email,
-            subject='You Are Invited To Join',
-            template='account/email/invite',
-            user=user,
-            invite_link=invite_link, )
-        flash('Candidate {} successfully referred'.format(user.full_name()),
+        if User.query.filter_by(email=referral_form.email.data).count() == 0:
+            user = User(
+                role=applicant_role,
+                first_name=referral_form.first_name.data,
+                last_name=referral_form.last_name.data,
+                email=referral_form.email.data)
+            current_user.candidates.append(user)
+            user.referrers.append(current_user)
+            db.session.add(user)
+            db.session.commit()
+            token = user.generate_confirmation_token()
+            invite_link = url_for(
+                'account.join_from_invite',
+                user_id=user.id,
+                token=token,
+                _external=True)
+            get_queue().enqueue(
+                send_email,
+                recipient=user.email,
+                subject='You Are Invited To Join',
+                template='account/email/invite',
+                user=user,
+                invite_link=invite_link, )
+            flash('Candidate {} successfully referred'.format(user.full_name()),
               'form-success')
         active='refer'
     

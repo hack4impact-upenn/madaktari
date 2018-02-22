@@ -10,12 +10,6 @@ else:
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-if os.path.exists('config.env'):
-    print('Importing environment from .env file')
-    for line in open('config.env'):
-        var = line.strip().split('=')
-        if len(var) == 2:
-            os.environ[var[0]] = var[1]
 
 
 class Config:
@@ -81,6 +75,7 @@ class ProductionConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'data.sqlite')
     SSL_DISABLE = (os.environ.get('SSL_DISABLE') or 'True') == 'True'
+    print("THIS IS IN PRODUCTION")
 
     @classmethod
     def init_app(cls, app):

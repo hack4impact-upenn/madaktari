@@ -1,0 +1,71 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<div class="ui stackable centered grid container">
+  <div class="twelve wide column">
+    <a class="ui basic compact button" href="{{ url_for('admin.index') }}">
+      <i class="caret left icon"></i>
+      Back to dashboard
+    </a>
+    <h2 class="ui header">
+      Feedback Form
+      <div class="sub header">Edit the feedback application form</div>
+    </h2>
+  </div>
+</div>
+<br/>
+<div>
+  <div class="ui grid">
+    <div class="row">
+      <div class="two wide column"></div>
+      <div class="eleven wide column">
+<style>
+.btn-group {
+  float: left !important;
+    width: 100%;
+}
+.button-full {
+  width: 100%;
+}
+</style>
+        <div id="fb-editor"></div>
+        <div id="fb-editor"></div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+        <script src="http://formbuilder.online/assets/js/form-builder.min.js"></script>
+        <script>
+          $(document).ready(function() {
+            window.formBuilder;
+            var options = {
+              formData: '{{ form|safe }}',
+              disabledActionButtons: ['data', 'clear', 'save'],
+              actionButtons: [{
+                id: 'upload',
+                className: 'ui button-full green button',
+                label: '<i class="save icon"></i>Upload And Save Form',
+                type: 'a',
+                events: {
+                  click: function() {
+                    var settings = {
+                      "async": true,
+                      "crossDomain": true,
+                      "url": "/admin/feedback/update-form",
+                      "method": "POST",
+                      "headers": {
+                        "content-type": "application/json",
+                        "cache-control": "no-cache",
+                      },
+                      "processData": false,
+                      "data": JSON.stringify(window.formBuilder.actions.getData('json'))
+                    }
+
+                    $.ajax(settings).done(function (response) {
+                      alert('Form has been successfully saved')
+                    });
+                  }
+                }
+              }]
+            };
+            window.formBuilder = $('#fb-editor').formBuilder(options); 
+          });
+        </script>
+        {% endblock %}
