@@ -37,7 +37,11 @@
                     </thead>
                     <tbody>
                     {% for r in responses  %}
-                        <tr onclick="window.location.href = '{{ url_for('admin.get_response', user_id=r.user_id) }}';">
+                    {% if type == 'feedback' %}
+                      <tr onclick="window.location.href = '{{ url_for('admin.feedback_get_response', user_id=r.user_id) }}';">
+                    {% else %}
+                      <tr onclick="window.location.href = '{{ url_for('admin.get_response', user_id=r.user_id) }}';">
+                    {% endif %}
 
                             <td>{{ r.user.first_name }}</td>
                             <td>{{ r.user.last_name }}</td>

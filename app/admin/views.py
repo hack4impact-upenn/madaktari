@@ -239,13 +239,13 @@ def get_responses():
 @login_required
 @admin_required
 def get_response(user_id):
-    r = FormResponse.query.filter_by(user_id=user_id).order_by('id desc').all()
+    r = FormResponse.query.filter_by(user_id=user_id).order_by('id desc').first()
     user = User.query.filter_by(id=user_id).first()
     if user is None:
         abort(404)
     form_resp_obj = []
     raw_form_content = ''
-    if r.form:
+    if r and r.form:
         raw_form_content = r.form.content
     raw_form_resp = r.content
     if raw_form_content and raw_form_resp:
@@ -312,7 +312,7 @@ def feedback_get_responses():
         if is_in is False:
             print(r_set)
             r_set.append(r)
-    return render_template('admin/view_responses.html', responses=r_set)
+    return render_template('admin/view_responses.html', responses=r_set, type="feedback")
 
 
 
@@ -320,12 +320,13 @@ def feedback_get_responses():
 @login_required
 @admin_required
 def feedback_get_response(user_id):
-    r = FeedbackFormResponse.query.filter_by(user_id=user_id).order_by('id desc').all()
+    r = FeedbackFormResponse.query.filter_by(user_id=user_id).order_by('id desc').first()
     user = User.query.filter_by(id=user_id).first()
     if user is None:
         abort(404)
     form_resp_obj = []
     raw_form_content = ''
+    print(r)
     if r.form:
         raw_form_content = r.form.content
     raw_form_resp = r.content
@@ -341,14 +342,7 @@ def feedback_get_response(user_id):
                 except:
                     pass
         form_resp_obj = sorted(form_resp_obj, key=lambda k: k['idx'])
-    form = ChangeAccountTypeForm()
-    if form.validate_on_submit():
-        user.role = form.role.data
-        db.session.add(user)
-        db.session.commit()
-        flash('User status {} successfully changed to {}.'
-              .format(user.full_name(), user.role.name), 'form-success')
-    return render_template('admin/form_response.html', form_resp_obj=form_resp_obj, user=user, form=form)
+    return render_template('admin/form_response.html', form_resp_obj=form_resp_obj, user=user)
 
 @admin.route('/teams/view-all', methods=['GET', 'POST'])
 @login_required

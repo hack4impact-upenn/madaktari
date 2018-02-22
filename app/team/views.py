@@ -1,14 +1,15 @@
-from flask import flash, redirect, render_template, request, url_for
+from flask import flash, redirect, render_template, request, url_for, jsonify
 from flask_login import current_user, login_required
 
 from flask_rq import get_queue
 from . import team
-from .. import db
-from ..models import User, Team, Role
+from .. import db, csrf
+from ..models import User, Team, Role, FeedbackForm, FeedbackFormResponse
 from ..email import send_email
 
 from .forms import ReferCandidateForm
 from ..account.overlap import (all_interval_overlap)
+import jsonpickle
 
 
 @team.route('/',  methods=['GET', 'POST'])
@@ -91,4 +92,46 @@ def add_to_team():
     return redirect(url_for('team.index', active='team'))
 
 
+@team.route('/feedback')
+@login_required
+def form():
+    content = None
+    form_resp_obj = []
+    try:
+        content = FeedbackForm.get_form_content()
+        if current_user.is_authenticated:
+            r = FeedbackFormResponse.query.filter_by(user_id=current_user.id).order_by('id desc').first()
+            raw_form_content = ''
+            if r.form:
+                raw_form_content = r.form.content
+            raw_form_resp = r.content
+            if raw_form_content and raw_form_resp:
+                form_content = jsonpickle.decode(raw_form_content)
+                form_resp = jsonpickle.decode(raw_form_resp)
+                for k in form_resp:
+                    k_new = k.replace('[]', '')
+                    for idx, x in enumerate(form_content):
+                        try:
+                            if x['name'] == k_new:
+                                form_resp_obj.append({'idx': idx, 'label': x['label'], 'resp': form_resp[k]})
+                        except:
+                            pass
+                form_resp_obj = sorted(form_resp_obj, key=lambda k: k['idx'])
+        print(content)
+        return render_template('team/feedback_form.html', content=content, form_resp_obj=form_resp_obj)
+    except Exception:
+        return render_template('team/feedback_form.html', content=content, form_resp_obj=form_resp_obj)
+        pass
 
+@team.route('/submit-form', methods=['POST'])
+@csrf.exempt
+def submit_form():
+    print(request.json)
+    content = jsonpickle.encode(request.json)
+    print(content)
+    current_form = FeedbackForm.query.order_by('id desc').first()
+    form = FeedbackFormResponse(user_id=current_user.id, content=content,
+                        form_id=current_form.id)
+    db.session.add(form)
+    db.session.commit()
+    return jsonify({'status': 200})

@@ -1,4 +1,4 @@
-from flask import flash, redirect, render_template, request, url_for
+from flask import flash, redirect, render_template, request, url_for, jsonify
 from flask_login import (current_user, login_required, login_user,
                          logout_user)
 from flask_rq import get_queue
@@ -342,12 +342,13 @@ def edit_dates():
             db.session.delete(r)
         db.session.commit()
         for r in ranges:
-            new_range = DateRange(start_date=parser.parse(r['start']), end_date=parser.parse(r['end']))
-            print(new_range.start_date)
-            db.session.add(new_range)
-            current_user.date_ranges.append(new_range)
+            if r['start'] != None and r['end'] != None:
+                new_range = DateRange(start_date=parser.parse(r['start']), end_date=parser.parse(r['end']))
+                print(new_range.start_date)
+                db.session.add(new_range)
+                current_user.date_ranges.append(new_range)
         db.session.commit()
-        flash('Your selected date ranges have been saved.', 'success')
+        return jsonify({ 'success': 200 })
     return render_template('account/edit_dates.html', dateranges=current_user.date_ranges)
 
 

@@ -25,7 +25,8 @@
                     {% if current_user.is_admin() == False %}
                     <a class="ui button green" href="{{ url_for('admin.submit_team', team_id=team.id) }}">Submit team to administrator for review</a><br><br>
                     {% if team.is_done != True %}<a class="ui button red" href="{{ url_for('admin.done_team', team_id=team.id, type=1) }}">Mark Team as Done With Trip</a>{% endif %}
-                    {% if team.is_done != False %}<a class="ui button red" href="{{ url_for('admin.done_team', team_id=team.id, type=0) }}">Mark Team as Not Done With Trip</a>
+                    {% if team.is_done != False and team.is_done != None %}<a class="ui button red" href="{{ url_for('admin.done_team', team_id=team.id, type=0) }}">Mark Team as Not Done With Trip</a>
+                    {% if team.is_done == True %}<a class="ui button green" href="/team/feedback">Fill out feedback form</a>{% endif %}
                     <br>{% endif %}
                     {% endif %}
                     <br>

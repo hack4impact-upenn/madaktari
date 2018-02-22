@@ -83,6 +83,7 @@ class User(UserMixin, db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     profile = db.relationship('Profile', backref='role', lazy='dynamic')
     responses = db.relationship('FormResponse', backref='user')
+    feedback_responses = db.relationship('FeedbackFormResponse', backref='user')
     date_ranges = db.relationship("DateRange", secondary=daterange_associations)
     referrers = db.relationship('User', secondary=referrals,
                                 primaryjoin=id==referrals.c.referrer_id,

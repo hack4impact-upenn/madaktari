@@ -28,7 +28,6 @@ class FeedbackForm(db.Model):
         return FeedbackForm.query.order_by('id desc').first().content
 
 
-
 class FeedbackFormResponse(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.PickleType, unique=False)
