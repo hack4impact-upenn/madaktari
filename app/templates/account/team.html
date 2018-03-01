@@ -4,7 +4,7 @@
     <div class="ui stackable grid container">
         <div class="sixteen wide tablet sixteen wide computer centered column">
             <h2 class="ui header">
-                My Teams
+              {% if current_user.is_admin() %} All Teams  {% else %} My Teams {% endif %}
                 <div class="sub header">
                   View and manage {% if current_user.is_admin() == False %} your {% endif %} teams
                 </div>

@@ -45,6 +45,10 @@
                     </div>
                     <div class="right menu">
                         <div class="item">
+                          <a href="http://www.madaktari.org" target="_blank">Go back to main site</a>
+                        </div>
+                          {% if current_user.is_authenticated %}
+                        <div class="item">
                           <p>Hello <strong>{{ current_user.first_name }}</strong></p>
                         </div>
                         <div class="item">
@@ -53,6 +57,7 @@
                         <div class="item">
                           <p><a href="{{ url_for('account.logout') }}">Logout</a></p>
                         </div>
+                          {% endif %}
                     </div>
                 </div>
             </div>
