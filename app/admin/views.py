@@ -32,7 +32,9 @@ def new_user():
         user = User(
             role=form.role.data,
             first_name=form.first_name.data,
-            last_name=form.last_name.data, email=form.email.data,
+            last_name=form.last_name.data,
+            email=form.email.data,
+            confirmed=True,
             password=form.password.data)
         db.session.add(user)
         db.session.commit()

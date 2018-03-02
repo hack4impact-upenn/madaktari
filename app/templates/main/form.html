@@ -16,10 +16,13 @@ This is going to be the main page
         <p>At this time, we are unable to approve your application. Please visit the main madaktari.org website and attempt to 
         contact an administrator/manager. Thank you for your interest. </p>
         {% elif current_user.is_role("pending") %}
-        <p>We are currently reviewing your application, please click on the madaktari logo in the top left to return home</p>
+        <p>We are currently reviewing your application. Please check again later or email info@madaktari.org </p>
         {% elif current_user.is_role("accepted") %}
-        <p>Hello,<br> Thank you for applying to Madaktari Africa. Congratulations! You have now been accepted as a volunteer for us. 
-        Return home and start with your team formation!</p>
+        <p>Welcome to the Madaktari Volunteer Team! <br>
+        Please ensure you complete all questions on the edit profile section to ensure we can match you in the best possible way with other volunteers. <br>
+        Should you have any other questions, or do you want to talk to us by phone, please contact us directly at: info@madaktari.org<br>
+
+Looking forward to welcome you at one of our hosting institutes!</p>
         {% elif current_user.is_role("applicant") and content is not none %}
           <div id="fb-render"></div>
           <form id="submitForm">
